@@ -83,6 +83,7 @@ select{font:500 15px var(--body);padding:8px 10px;border-radius:10px;border:1px 
 .photos button{display:block;width:100%;padding:0;border:0;background:none;cursor:zoom-in}
 .photos img{display:block;width:100%;aspect-ratio:4/3;object-fit:cover;max-width:100%}
 .photos figure.wide{grid-column:1/-1}
+.photos figure video{display:block;width:100%;background:#000;aspect-ratio:16/9}
 .photos figure.wide img{aspect-ratio:auto}
 .photos figcaption{padding:6px 10px;font-size:13px;color:var(--muted)}
 .empty{padding:28px 16px;text-align:center;color:var(--muted);font-size:14.5px;line-height:1.7}
@@ -189,7 +190,9 @@ const SPONSORS = [
   // { name: "홍길동", amount: 100000 },
 ];
 const PHOTOS = [
+  { video: "photos/v01.mp4", poster: "photos/v01.jpg", cap: "2026 3Q 한테니스 분기대회 예고 영상" },
   // { src: "photos/01.jpg", cap: "단체 사진" },
+  // 동영상: { video: "photos/v01.mp4", poster: "photos/v01.jpg", cap: "설명" },
 ];
 const UPDATED = "";            // 예: "10/11 10:25"
 const RESULTS = {
@@ -314,7 +317,7 @@ function renderSponsors(){
 function renderPhotos(){
   const box=document.getElementById("photos");
   document.getElementById("nophoto").hidden=PHOTOS.length>0;
-  box.innerHTML=PHOTOS.map((ph,i)=>`<figure class="${i===0?"wide":""}"><button type="button" data-src="${ph.src}" aria-label="사진 크게 보기"><img src="${ph.src}" alt="${ph.cap||"기념사진"}" loading="${i<2?"eager":"lazy"}"></button>${ph.cap?`<figcaption>${ph.cap}</figcaption>`:""}</figure>`).join("");
+  box.innerHTML=PHOTOS.map((ph,i)=>ph.video?`<figure class="${i===0?"wide":""}"><video src="${ph.video}" ${ph.poster?`poster="${ph.poster}"`:""} controls playsinline preload="metadata"></video>${ph.cap?`<figcaption>${ph.cap}</figcaption>`:""}</figure>`:`<figure class="${i===0?"wide":""}"><button type="button" data-src="${ph.src}" aria-label="사진 크게 보기"><img src="${ph.src}" alt="${ph.cap||"기념사진"}" loading="${i<2?"eager":"lazy"}"></button>${ph.cap?`<figcaption>${ph.cap}</figcaption>`:""}</figure>`).join("");
   box.querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>{
     const lb=document.createElement("div"); lb.className="lb"; lb.setAttribute("role","dialog");
     const im=document.createElement("img"); im.src=b.dataset.src; im.alt="기념사진 크게 보기"; lb.appendChild(im);
