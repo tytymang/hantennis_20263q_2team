@@ -296,13 +296,13 @@ function winProb(){
 }
 function renderProb(){
   const {b,r,d,rest,B,R}=winProb();
-  let pb=Math.round(b*100),pr=Math.round(r*100),pd=100-pb-pr; if(pd<0){pd=0;}
+  const done=rest===0&&d>0.5; let pb=Math.round((b+d/2)*100),pr=100-pb,pd=0;
   const seg=(c,v,t)=>v>0?`<div class="${c}" style="width:${v}%">${v>=8?t+v+"%":""}</div>`:"";
-  const head=rest===0?(pb===100?"팀 블루 우승!":pr===100?"팀 레드 우승!":"공동 우승"):(pb===100?"팀 블루 우승 확정":pr===100?"팀 레드 우승 확정":"");
+  const head=done?"공동 우승":rest===0?(pb===100?"팀 블루 우승!":"팀 레드 우승!"):(pb===100?"팀 블루 우승 확정":pr===100?"팀 레드 우승 확정":"");
   document.getElementById("prob").innerHTML=
-    `<div class="plab"><span>${chip("T1",true)} <b>${pb}%</b></span>${head?`<strong>${head}</strong>`:(pd>0?`<span style="color:var(--muted)">공동 ${pd}%</span>`:"")}<span><b>${pr}%</b> ${chip("T2",true)}</span></div>`+
-    `<div class="pbar" role="img" aria-label="팀 블루 ${pb}%, 공동 ${pd}%, 팀 레드 ${pr}%">${seg("pb",pb,"")}${seg("pd",pd,"")}${seg("pr",pr,"")}</div>`+
-    `<p class="pnote">현재 승점 블루 ${B.p} : ${R.p} 레드 · 남은 경기 ${rest}경기<br>남은 경기는 양팀 승리 확률을 같게(무승부 10%) 보고 모든 경우의 수를 계산했습니다. 승점이 같으면 게임 득실차로 판정.</p>`;
+    `<div class="plab"><span>${chip("T1",true)} <b>${pb}%</b></span>${head?`<strong>${head}</strong>`:""}<span><b>${pr}%</b> ${chip("T2",true)}</span></div>`+
+    `<div class="pbar" role="img" aria-label="팀 블루 ${pb}%, 팀 레드 ${pr}%">${seg("pb",pb,"")}${seg("pr",pr,"")}</div>`+
+    `<p class="pnote">현재 승점 블루 ${B.p} : ${R.p} 레드 · 남은 경기 ${rest}경기<br>남은 경기는 양팀 승리 확률을 같게(무승부 10%) 보고 모든 경우의 수를 계산했습니다. 승점이 같으면 게임 득실차로 판정하며, 그것까지 같은 경우는 양팀에 반씩 나눴습니다.</p>`;
 }
 
 function render(){
