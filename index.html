@@ -293,9 +293,14 @@ function renderSponsors(){
   if(!SPONSORS.length){t.parentElement.hidden=true;none.hidden=false;return}
   t.parentElement.hidden=false;none.hidden=true;
   const won=n=>Number(n).toLocaleString("ko-KR")+"원";
-  const total=SPONSORS.reduce((a,x)=>a+Number(x.amount||0),0);
+  // 같은 사람이 여러 번 내면 한 줄로 합산
+  const m=new Map();
+  for(const x of SPONSORS){const r=m.get(x.name)||{name:x.name,amount:0,notes:[]};
+    if(x.amount)r.amount+=Number(x.amount); if(x.note)r.notes.push(x.note); m.set(x.name,r);}
+  const rows=[...m.values()].map(r=>({name:r.name,amount:r.amount,note:r.notes.join(", ")}));
+  const total=rows.reduce((a,x)=>a+Number(x.amount||0),0);
   t.innerHTML=`<tr><th style="text-align:left">이름</th><th style="text-align:right">찬조금</th></tr>`+
-    SPONSORS.map(x=>`<tr><td class="pname">${x.name}</td><td style="text-align:right">${x.amount?won(x.amount):(x.note||"")}</td></tr>`).join("")+
+    rows.map(x=>`<tr><td class="pname">${x.name}</td><td style="text-align:right">${[x.amount?won(x.amount):"",x.note].filter(Boolean).join(" + ")}</td></tr>`).join("")+
     `<tr><td class="pname">합계</td><td style="text-align:right"><b>${won(total)}</b></td></tr>`;
 }
 function renderPhotos(){
