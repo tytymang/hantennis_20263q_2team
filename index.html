@@ -6,55 +6,63 @@
 <meta http-equiv="Cache-Control" content="no-cache">
 <title>한테니스 2026년 3분기 대회 B안 (2팀)</title>
 <meta property="og:title" content="한테니스 2026년 3분기 대회 B안 (2팀)">
+<meta property="og:image" content="https://tytymang.github.io/hantennis_20263q_2team/logo.png">
+<link rel="icon" href="logo.png">
+<link rel="apple-touch-icon" href="logo.png">
 <meta property="og:description" content="10/11(일) 팀 편성 · 경기 순서 · 실시간 순위">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;500;700;900&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@700;900&family=Noto+Sans+KR:wght@400;500;700;900&display=swap">
 <style>
 /* Layout: 모바일 1열 — 상단 대회 헤더, 탭(순위/경기/팀), 카드형 경기 목록 */
 :root{
-  --bg:#f3f6f4; --surface:#ffffff; --ink:#14201a; --muted:#5d6b63; --line:#dbe3de;
-  --court:#1f5f46; --ball:#d7e84a;
-  --a:#2357c9; --a-bg:#e9f0fd; --b:#178a4c; --b-bg:#e6f5ec; --c:#c8372d; --c-bg:#fcebe9;
-  --win:#178a4c; --draw:#8a6d12;
-  --display:'Black Han Sans','Noto Sans KR',sans-serif; --body:'Noto Sans KR',system-ui,sans-serif;
+  --bg:#f5f2ea; --surface:#fffdf8; --ink:#1b2236; --muted:#6a6c78; --line:#e4dccb;
+  --court:#1f2433; --ball:#c2a165; --gold-ink:#1f2433;
+  --a:#2f4a8a; --a-bg:#e9edf6; --b:#2e6b4f; --b-bg:#e7f1ec; --c:#8c2f39; --c-bg:#f6e8ea;
+  --win:#2e6b4f; --draw:#8a6d12;
+  --display:'Noto Serif KR',serif; --body:'Noto Sans KR',system-ui,sans-serif;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#0f1512; --surface:#18211c; --ink:#e8efe9; --muted:#9aa8a0; --line:#2a362f;
-  --court:#7cc7a2; --ball:#d7e84a;
-  --a:#7aa2ff; --a-bg:#1a2540; --b:#5fd08f; --b-bg:#16301f; --c:#ff8a7f; --c-bg:#3a1c19;
-  --win:#5fd08f; --draw:#e3c25a; color-scheme:dark}}
+  --bg:#10141f; --surface:#181e2c; --ink:#ece6d8; --muted:#a3a6b2; --line:#2a3245;
+  --court:#0c0f18; --ball:#d2b273; --gold-ink:#1f2433;
+  --a:#8aa6e6; --a-bg:#1c2640; --b:#6cc49a; --b-bg:#15291f; --c:#e5848e; --c-bg:#36191d;
+  --win:#6cc49a; --draw:#e3c25a; color-scheme:dark}}
 :root[data-theme="dark"]{
-  --bg:#0f1512; --surface:#18211c; --ink:#e8efe9; --muted:#9aa8a0; --line:#2a362f;
-  --court:#7cc7a2; --ball:#d7e84a;
-  --a:#7aa2ff; --a-bg:#1a2540; --b:#5fd08f; --b-bg:#16301f; --c:#ff8a7f; --c-bg:#3a1c19;
-  --win:#5fd08f; --draw:#e3c25a; color-scheme:dark}
+  --bg:#10141f; --surface:#181e2c; --ink:#ece6d8; --muted:#a3a6b2; --line:#2a3245;
+  --court:#0c0f18; --ball:#d2b273; --gold-ink:#1f2433;
+  --a:#8aa6e6; --a-bg:#1c2640; --b:#6cc49a; --b-bg:#15291f; --c:#e5848e; --c-bg:#36191d;
+  --win:#6cc49a; --draw:#e3c25a; color-scheme:dark}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 html{-webkit-text-size-adjust:100%}
 body{margin:0;word-break:keep-all;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.5}
 .wrap{max-width:760px;margin:0 auto;padding-inline:16px;padding-block:20px 48px}
-header{background:var(--court);color:#fff;border-radius:16px;padding:20px 20px 18px;position:relative;overflow:hidden}
-header::after{content:"";position:absolute;inset:auto -30px -30px auto;width:120px;height:120px;border:3px solid rgba(255,255,255,.25);border-radius:50%}
-header h1{font-family:var(--display);font-weight:400;font-size:30px;margin:0;letter-spacing:.5px;text-wrap:balance}
-header .meta{margin-top:6px;font-size:13.5px;opacity:.9}
+header{background:var(--court);color:#f4ecd8;border-radius:16px;padding:18px 18px 16px;position:relative;overflow:hidden;border:1.5px solid var(--ball);box-shadow:inset 0 0 0 4px var(--court),inset 0 0 0 5px rgba(194,161,101,.45)}
+.brand{display:flex;gap:14px;align-items:center}
+.brand img{width:62px;height:auto;flex:none;filter:drop-shadow(0 2px 4px rgba(0,0,0,.35))}
+.brand>div{min-width:0}
+header::after{content:"";position:absolute;inset:auto -34px -34px auto;width:120px;height:120px;border:2px solid rgba(194,161,101,.35);border-radius:50%}
+header h1{font-family:var(--display);font-weight:900;font-size:25px;line-height:1.3;margin:0;letter-spacing:-.2px;text-wrap:balance;color:#f4ecd8}
+header h1 .club{display:block;font-size:13px;letter-spacing:.18em;color:var(--ball);font-weight:700;margin-bottom:2px}
+header .meta{margin-top:10px;font-size:13.5px;color:#d9cfb8}
 .updrow{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px;position:relative;z-index:1}
-.reload{border:1.5px solid rgba(255,255,255,.7);background:transparent;color:#fff;font:700 13px var(--body);border-radius:999px;padding:4px 12px;cursor:pointer}
+.reload{border:1.5px solid var(--ball);background:transparent;color:#f4ecd8;font:700 13px var(--body);border-radius:999px;padding:4px 12px;cursor:pointer}
 .reload:active{background:rgba(255,255,255,.2)}
 .reload:focus-visible{outline:3px solid var(--ball);outline-offset:2px}
-.upd{display:inline-block;background:var(--ball);color:#1d2410;font-weight:700;font-size:12.5px;border-radius:999px;padding:3px 10px}
+.upd{display:inline-block;background:var(--ball);color:var(--gold-ink);font-weight:700;font-size:12.5px;border-radius:999px;padding:3px 10px}
 nav{display:flex;gap:6px;margin:16px 0 14px;position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);padding-block:6px;z-index:2}
 nav button{flex:1;border:1px solid var(--line);background:var(--surface);color:var(--ink);font:700 15px var(--body);padding:10px 0;border-radius:10px;cursor:pointer}
-nav button[aria-selected="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+nav button[aria-selected="true"]{background:var(--court);color:#f4ecd8;border-color:var(--court);box-shadow:inset 0 -3px 0 var(--ball)}
 nav button:focus-visible,select:focus-visible{outline:3px solid var(--ball);outline-offset:2px}
-h2{font-size:17px;margin:22px 0 10px;font-weight:900}
+h2{font-family:var(--display);font-size:18px;margin:24px 0 10px;font-weight:900;display:flex;align-items:center;gap:8px}
+h2::before{content:"";width:4px;height:16px;border-radius:2px;background:var(--ball)}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:14px}
 .tbl{overflow-x:auto}
 table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
 th,td{padding:10px 6px;text-align:center;border-bottom:1px solid var(--line);white-space:nowrap}
 th{font-size:12.5px;color:var(--muted);font-weight:700}
 tr:last-child td{border-bottom:0}
-.rank{font-family:var(--display);font-size:22px;font-weight:400}
+.rank{font-family:var(--display);font-size:22px;font-weight:900;color:var(--ball)}
 .pts{font-weight:900;font-size:18px}
 .tchip{display:inline-flex;align-items:center;justify-content:center;min-width:24px;height:24px;border-radius:6px;color:#fff;font-weight:900;font-size:13px;padding:0 6px}
 .T1{background:var(--a)} .T2{background:var(--c)}
@@ -63,7 +71,7 @@ tr:last-child td{border-bottom:0}
 .filter label{font-weight:700;font-size:14px}
 select{font:500 15px var(--body);padding:8px 10px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink);min-width:0;flex:1;max-width:260px}
 .games{display:grid;gap:10px}
-.vipb{display:inline-block;background:var(--ball);color:#1d2410;font-weight:900;font-size:11px;border-radius:5px;padding:1px 6px;margin-right:6px;vertical-align:1px;letter-spacing:.04em}
+.vipb{display:inline-block;background:var(--ball);color:var(--gold-ink);font-weight:900;font-size:11px;border-radius:5px;padding:1px 6px;margin-right:6px;vertical-align:1px;letter-spacing:.04em}
 .vip{margin-bottom:14px;background:var(--surface);border:2px solid var(--ball);border-radius:16px;padding:16px 18px;display:grid;grid-template-columns:auto 1fr;gap:4px 14px;align-items:center}
 .vip .medal{grid-row:1/4;width:64px;height:64px;border-radius:50%;background:var(--ball);color:#1d2410;display:flex;align-items:center;justify-content:center;font-family:var(--display);font-size:22px;letter-spacing:.5px}
 .vip .lbl{font-size:12.5px;font-weight:900;color:var(--muted);letter-spacing:.06em}
@@ -95,7 +103,7 @@ select{font:500 15px var(--body);padding:8px 10px;border-radius:10px;border:1px 
 .side.T1{background:var(--a-bg)} .side.T2{background:var(--c-bg)}
 .side .names{font-weight:700;font-size:14.5px;min-width:0;overflow-wrap:anywhere;color:var(--ink)}
 .side.right{justify-content:flex-end;text-align:right}
-.score{font-family:var(--display);font-size:22px;min-width:64px;text-align:center;font-variant-numeric:tabular-nums}
+.score{font-family:var(--body);font-weight:900;font-size:22px;min-width:64px;text-align:center;font-variant-numeric:tabular-nums}
 .score.none{font-family:var(--body);font-size:13px;color:var(--muted);font-weight:700}
 .win .names::after{content:" 승";color:var(--win);font-weight:900;font-size:12px}
 .hl{outline:3px solid var(--ball);outline-offset:-1px}
@@ -116,7 +124,7 @@ select{font:500 15px var(--body);padding:8px 10px;border-radius:10px;border:1px 
 
 <div class="wrap">
   <header>
-    <h1>한테니스 2026년 3분기 대회 B안 (2팀)</h1>
+    <div class="brand"><img src="logo.png" alt="한테니스 클럽 로고"><div><h1><span class="club">HAN TENNIS CLUB</span>한테니스 2026년 3분기 대회 B안 (2팀)</h1></div></div>
     <div class="meta">10/11(일) · 3·4번 코트 · 8:00 시작 · 12경기 (1팀 vs 2팀)</div>
     <div class="updrow"><div class="upd" id="upd"></div><button type="button" id="reload" class="reload">⟳ 새로고침</button></div>
   </header>
