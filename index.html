@@ -122,16 +122,19 @@ select{font:500 15px var(--body);padding:8px 10px;border-radius:10px;border:1px 
   </header>
 
   <nav role="tablist">
-    <button role="tab" id="t-photo" aria-selected="true" data-p="p-photo">기념사진</button>
+    <button role="tab" id="t-photo" aria-selected="true" data-p="p-photo">추억</button>
     <button role="tab" id="t-rank" aria-selected="false" data-p="p-rank">순위</button>
     <button role="tab" id="t-games" aria-selected="false" data-p="p-games">경기</button>
     <button role="tab" id="t-teams" aria-selected="false" data-p="p-teams">팀·규칙</button>
   </nav>
 
   <section id="p-photo">
-    <h2>기념사진</h2>
+    <h2>찬조</h2>
+    <div class="card tbl"><table id="sponsors"></table></div>
+    <p class="note" id="nospon" hidden>아직 등록된 찬조 내역이 없습니다.</p>
+    <h2>추억</h2>
     <div class="photos" id="photos"></div>
-    <div class="card empty" id="nophoto" hidden>대회가 끝나면 이곳에 기념사진이 올라옵니다.<br>사진은 운영진에게 보내주세요.</div>
+    <div class="card empty" id="nophoto" hidden>대회가 끝나면 이곳에 추억 사진이 올라옵니다.<br>사진은 운영진에게 보내주세요.</div>
   </section>
 
   <section id="p-rank" hidden>
@@ -173,6 +176,10 @@ select{font:500 15px var(--body);padding:8px 10px;border-radius:10px;border:1px 
 "use strict";
 /* ===== 데이터: 결과는 RESULTS에만 입력 (경기번호: [왼쪽 게임수, 오른쪽 게임수]) ===== */
 /* 기념사진: photos 폴더 파일명과 설명 (첫 번째 사진은 크게 표시) */
+/* 찬조: 이름과 금액(원) */
+const SPONSORS = [
+  // { name: "홍길동", amount: 100000 },
+];
 const PHOTOS = [
   // { src: "photos/01.jpg", cap: "단체 사진" },
 ];
@@ -257,6 +264,7 @@ function render(){
     `<tr><th>선수</th><th>경기</th><th>승</th><th>무</th><th>패</th><th>득</th><th>실</th><th>득실</th></tr>`+
     ps.map(r=>{const vip=rk.played>0&&r.played>0&&r.w===rk.w&&(r.gf-r.ga)===(rk.gf-rk.ga)&&r.gf===rk.gf;
       return `<tr><td class="pname">${vip?'<span class="vipb">VIP</span>':''}${chip(r.t)}${r.p}</td><td>${r.played}/${r.n}</td><td><b>${r.w}</b></td><td>${r.d}</td><td>${r.l}</td><td>${r.gf}</td><td>${r.ga}</td><td><b>${sign(r.gf-r.ga)}</b></td></tr>`}).join("");
+  renderSponsors();
   renderPhotos();
   renderGames();
   document.getElementById("teams").innerHTML = Object.entries(TEAMS).map(([t,ps])=>{
@@ -279,6 +287,16 @@ function renderVip(){
     <div class="who">${top.map(x=>chip(x.t)+" "+x.p).join(" ")}</div>
     <div class="rec"><b>${r.w}</b>승 ${r.d}무 ${r.l}패 · 게임 득실 <b>${sign(r.gf-r.ga)}</b> (득 ${r.gf} · 실 ${r.ga})</div>`;
   el.hidden=false;
+}
+function renderSponsors(){
+  const t=document.getElementById("sponsors"), none=document.getElementById("nospon");
+  if(!SPONSORS.length){t.parentElement.hidden=true;none.hidden=false;return}
+  t.parentElement.hidden=false;none.hidden=true;
+  const won=n=>Number(n).toLocaleString("ko-KR")+"원";
+  const total=SPONSORS.reduce((a,x)=>a+Number(x.amount||0),0);
+  t.innerHTML=`<tr><th style="text-align:left">이름</th><th style="text-align:right">찬조금</th></tr>`+
+    SPONSORS.map(x=>`<tr><td class="pname">${x.name}</td><td style="text-align:right">${x.amount?won(x.amount):(x.note||"")}</td></tr>`).join("")+
+    `<tr><td class="pname">합계</td><td style="text-align:right"><b>${won(total)}</b></td></tr>`;
 }
 function renderPhotos(){
   const box=document.getElementById("photos");
