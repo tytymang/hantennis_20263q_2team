@@ -9,7 +9,7 @@
 <meta property="og:image" content="https://tytymang.github.io/hantennis_20263q_2team/logo.png">
 <link rel="icon" href="logo.png">
 <link rel="apple-touch-icon" href="logo.png">
-<meta property="og:description" content="10/11(일) 팀 편성 · 경기 순서 · 실시간 순위">
+<meta property="og:description" content="10/11(일) 팀 편성 · 경기 순서 · 실시간 성적·우승 확률">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@700;900&family=Noto+Sans+KR:wght@400;500;700;900&display=swap">
@@ -101,6 +101,13 @@ select{font:500 15px var(--body);padding:8px 10px;border-radius:10px;border:1px 
 .status.done{color:var(--win)} .status.wait{color:var(--muted)}
 .row{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center}
 .side{border-radius:10px;padding:8px 10px;min-width:0;display:flex;gap:8px;align-items:center}
+.prob{padding:14px 16px}
+.prob .pbar{display:flex;height:34px;border-radius:8px;overflow:hidden;background:var(--line)}
+.prob .pbar>div{display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:14px;white-space:nowrap;min-width:0;transition:width .4s}
+.prob .pb{background:#2563c9}.prob .pr{background:#d0343c}.prob .pd{background:#8a8f9c}
+.prob .plab{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:14px}
+.prob .plab b{font-size:22px;font-variant-numeric:tabular-nums}
+.prob .pnote{margin:10px 0 0;font-size:12px;color:var(--muted)}
 .side.T1{background:var(--blue-bg)} .side.T2{background:var(--red-bg)}
 .side .names{font-weight:700;font-size:14.5px;min-width:0;overflow-wrap:anywhere;color:var(--ink)}
 .side.right{justify-content:flex-end;text-align:right}
@@ -132,9 +139,9 @@ select{font:500 15px var(--body);padding:8px 10px;border-radius:10px;border:1px 
 
   <nav role="tablist">
     <button role="tab" id="t-photo" aria-selected="true" data-p="p-photo">추억</button>
-    <button role="tab" id="t-rank" aria-selected="false" data-p="p-rank">순위</button>
-    <button role="tab" id="t-games" aria-selected="false" data-p="p-games">경기</button>
     <button role="tab" id="t-teams" aria-selected="false" data-p="p-teams">팀·규칙</button>
+    <button role="tab" id="t-games" aria-selected="false" data-p="p-games">경기</button>
+    <button role="tab" id="t-rank" aria-selected="false" data-p="p-rank">성적</button>
   </nav>
 
   <section id="p-photo">
@@ -147,6 +154,8 @@ select{font:500 15px var(--body);padding:8px 10px;border-radius:10px;border:1px 
   </section>
 
   <section id="p-rank" hidden>
+    <h2>우승 확률</h2>
+    <div class="card prob" id="prob"></div>
     <h2>팀 순위</h2>
     <div class="card tbl"><table id="standings"></table></div>
     <p class="note">순위: 승점 → 게임 득실차 순. 승 3점 · 무 1점 · 패 0점</p>
@@ -265,7 +274,39 @@ const LABEL={T1:"블루",T2:"레드"};
 const chip=(t,full)=>`<span class="tchip ${t}">${full?"팀 ":""}${LABEL[t]}</span>`;
 const sign=n=>n>0?"+"+n:String(n);
 
+/* 우승 확률: 남은 경기를 모두 경우의 수로 계산 (경기당 무 10%, 양팀 승 각 45%, 진 쪽 게임 0~4 가중) */
+function winProb(){
+  const st=Object.fromEntries(standings().map(r=>[r.t,r]));
+  const B=st.T1,R=st.T2;
+  const rest=GAMES.filter(g=>!RESULTS[g[0]]).length;
+  const LOSE=[[0,.05],[1,.10],[2,.20],[3,.30],[4,.35]];
+  let dist=new Map([[`${B.p-R.p},${(B.gf-B.ga)-(R.gf-R.ga)}`,1]]);
+  for(let i=0;i<rest;i++){
+    const nx=new Map(); const add=(k,v)=>nx.set(k,(nx.get(k)||0)+v);
+    for(const [k,v] of dist){const [pd,gd]=k.split(",").map(Number);
+      add(`${pd},${gd}`,v*.10);
+      for(const [l,w] of LOSE){add(`${pd+3},${gd+6-l}`,v*.45*w);add(`${pd-3},${gd-6+l}`,v*.45*w);}
+    }
+    dist=nx;
+  }
+  let b=0,r=0,d=0;
+  for(const [k,v] of dist){const [pd,gd]=k.split(",").map(Number);
+    if(pd>0||(pd===0&&gd>0))b+=v; else if(pd<0||(pd===0&&gd<0))r+=v; else d+=v;}
+  return {b,r,d,rest,B,R};
+}
+function renderProb(){
+  const {b,r,d,rest,B,R}=winProb();
+  let pb=Math.round(b*100),pr=Math.round(r*100),pd=100-pb-pr; if(pd<0){pd=0;}
+  const seg=(c,v,t)=>v>0?`<div class="${c}" style="width:${v}%">${v>=8?t+v+"%":""}</div>`:"";
+  const head=rest===0?(pb===100?"팀 블루 우승!":pr===100?"팀 레드 우승!":"공동 우승"):(pb===100?"팀 블루 우승 확정":pr===100?"팀 레드 우승 확정":"");
+  document.getElementById("prob").innerHTML=
+    `<div class="plab"><span>${chip("T1",true)} <b>${pb}%</b></span>${head?`<strong>${head}</strong>`:(pd>0?`<span style="color:var(--muted)">공동 ${pd}%</span>`:"")}<span><b>${pr}%</b> ${chip("T2",true)}</span></div>`+
+    `<div class="pbar" role="img" aria-label="팀 블루 ${pb}%, 공동 ${pd}%, 팀 레드 ${pr}%">${seg("pb",pb,"")}${seg("pd",pd,"")}${seg("pr",pr,"")}</div>`+
+    `<p class="pnote">현재 승점 블루 ${B.p} : ${R.p} 레드 · 남은 경기 ${rest}경기<br>남은 경기는 양팀 승리 확률을 같게(무승부 10%) 보고 모든 경우의 수를 계산했습니다. 승점이 같으면 게임 득실차로 판정.</p>`;
+}
+
 function render(){
+  renderProb();
   document.getElementById("upd").textContent = UPDATED ? "최종 업데이트 "+UPDATED : "경기 시작 전 · 결과가 입력되면 자동 반영";
   const st=standings();
   document.getElementById("standings").innerHTML =
