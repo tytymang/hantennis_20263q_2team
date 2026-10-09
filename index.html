@@ -18,19 +18,19 @@
 :root{
   --bg:#f5f2ea; --surface:#fffdf8; --ink:#1b2236; --muted:#6a6c78; --line:#e4dccb;
   --court:#1f2433; --ball:#c2a165; --gold-ink:#1f2433;
-  --a:#2f4a8a; --a-bg:#e9edf6; --b:#2e6b4f; --b-bg:#e7f1ec; --c:#8c2f39; --c-bg:#f6e8ea;
+  --a:#2f4a8a; --a-bg:#e9edf6; --b:#2e6b4f; --b-bg:#e7f1ec; --c:#8c2f39; --c-bg:#f6e8ea; --blue-bg:#e6eefb; --red-bg:#fbe9ea;
   --win:#2e6b4f; --draw:#8a6d12;
   --display:'Noto Serif KR',serif; --body:'Noto Sans KR',system-ui,sans-serif;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --bg:#10141f; --surface:#181e2c; --ink:#ece6d8; --muted:#a3a6b2; --line:#2a3245;
   --court:#0c0f18; --ball:#d2b273; --gold-ink:#1f2433;
-  --a:#8aa6e6; --a-bg:#1c2640; --b:#6cc49a; --b-bg:#15291f; --c:#e5848e; --c-bg:#36191d;
+  --a:#8aa6e6; --a-bg:#1c2640; --b:#6cc49a; --b-bg:#15291f; --c:#e5848e; --c-bg:#36191d; --blue-bg:#172744; --red-bg:#3d1a1f;
   --win:#6cc49a; --draw:#e3c25a; color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#10141f; --surface:#181e2c; --ink:#ece6d8; --muted:#a3a6b2; --line:#2a3245;
   --court:#0c0f18; --ball:#d2b273; --gold-ink:#1f2433;
-  --a:#8aa6e6; --a-bg:#1c2640; --b:#6cc49a; --b-bg:#15291f; --c:#e5848e; --c-bg:#36191d;
+  --a:#8aa6e6; --a-bg:#1c2640; --b:#6cc49a; --b-bg:#15291f; --c:#e5848e; --c-bg:#36191d; --blue-bg:#172744; --red-bg:#3d1a1f;
   --win:#6cc49a; --draw:#e3c25a; color-scheme:dark}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
@@ -65,7 +65,7 @@ tr:last-child td{border-bottom:0}
 .rank{font-family:var(--display);font-size:22px;font-weight:900;color:var(--ball)}
 .pts{font-weight:900;font-size:18px}
 .tchip{display:inline-flex;align-items:center;justify-content:center;min-width:24px;height:24px;border-radius:6px;color:#fff;font-weight:900;font-size:13px;padding:0 6px}
-.T1{background:var(--a)} .T2{background:var(--c)}
+.T1{background:#2563c9} .T2{background:#d0343c}
 .note{font-size:12.5px;color:var(--muted);margin-top:8px}
 .filter{display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap}
 .filter label{font-weight:700;font-size:14px}
@@ -101,7 +101,7 @@ select{font:500 15px var(--body);padding:8px 10px;border-radius:10px;border:1px 
 .status.done{color:var(--win)} .status.wait{color:var(--muted)}
 .row{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center}
 .side{border-radius:10px;padding:8px 10px;min-width:0;display:flex;gap:8px;align-items:center}
-.side.T1{background:var(--a-bg)} .side.T2{background:var(--c-bg)}
+.side.T1{background:var(--blue-bg)} .side.T2{background:var(--red-bg)}
 .side .names{font-weight:700;font-size:14.5px;min-width:0;overflow-wrap:anywhere;color:var(--ink)}
 .side.right{justify-content:flex-end;text-align:right}
 .score{font-family:var(--body);font-weight:900;font-size:22px;min-width:64px;text-align:center;font-variant-numeric:tabular-nums}
@@ -126,7 +126,7 @@ select{font:500 15px var(--body);padding:8px 10px;border-radius:10px;border:1px 
 <div class="wrap">
   <header>
     <div class="brand"><img src="logo.png" alt="한테니스 클럽 로고"><div><h1><span class="club">HAN TENNIS CLUB</span>한테니스 2026년 3분기 대회</h1></div></div>
-    <div class="meta">10/11(일) · 3·4번 코트 · 8:00 시작 · 12경기 (1팀 vs 2팀)</div>
+    <div class="meta">10/11(일) · 3·4번 코트 · 8:00 시작 · 12경기 (팀 블루 vs 팀 레드)</div>
     <div class="updrow"><div class="upd" id="upd"></div><button type="button" id="reload" class="reload">⟳ 새로고침</button></div>
   </header>
 
@@ -261,8 +261,8 @@ function playerStats(){
   }
   return out;
 }
-const LABEL={T1:"1",T2:"2"};
-const chip=t=>`<span class="tchip ${t}">${LABEL[t]}</span>`;
+const LABEL={T1:"블루",T2:"레드"};
+const chip=(t,full)=>`<span class="tchip ${t}">${full?"팀 ":""}${LABEL[t]}</span>`;
 const sign=n=>n>0?"+"+n:String(n);
 
 function render(){
@@ -284,7 +284,7 @@ function render(){
   renderPhotos();
   renderGames();
   document.getElementById("teams").innerHTML = Object.entries(TEAMS).map(([t,ps])=>{
-    return `<div class="card team"><h3>${chip(t)} ${LABEL[t]}팀</h3><ul>`+
+    return `<div class="card team"><h3>${chip(t,true)}</h3><ul>`+
       ps.map(p=>{const n=GAMES.filter(g=>g[5].includes(p)||g[7].includes(p)).length;return `<li>${p}<span>${n}경기</span></li>`}).join("")+`</ul></div>`;
   }).join("");
 }
@@ -354,7 +354,7 @@ function renderGames(){
 /* 선수 선택 목록 */
 const sel=document.getElementById("who");
 Object.entries(TEAMS).forEach(([t,ps])=>{
-  const og=document.createElement("optgroup"); og.label=LABEL[t]+"팀";
+  const og=document.createElement("optgroup"); og.label="팀 "+LABEL[t];
   ps.forEach(p=>{const o=document.createElement("option");o.value=p;o.textContent=p;og.appendChild(o)});
   sel.appendChild(og);
 });
