@@ -189,7 +189,7 @@ select{font:500 15px var(--body);padding:8px 10px;border-radius:10px;border:1px 
     <h2>팀 순위</h2>
     <div class="card tbl"><table id="standings"></table></div>
     <p class="note">순위: 승점 → 게임 득실차 순. 승 3점 · 무 1점 · 패 0점</p>
-    <h2>대결별 현황</h2>
+    <h2>팀 대항 성적</h2>
     <div class="card tbl"><table id="ties"></table></div>
     <h2>개인 성적</h2>
     <div class="card tbl"><table id="players"></table></div>
@@ -351,7 +351,7 @@ function render(){
     `<tr><th>순위</th><th>팀</th><th>승점</th><th>경기</th><th>승</th><th>무</th><th>패</th><th>득</th><th>실</th><th>득실</th></tr>`+
     st.map((r,i)=>`<tr><td class="rank">${tieRank(st,i)}</td><td>${chip(r.t)}</td><td class="pts">${r.p}</td><td>${r.n}/${GAMES.filter(g=>g[4]===r.t||g[6]===r.t).length}</td><td>${r.w}</td><td>${r.d}</td><td>${r.l}</td><td>${r.gf}</td><td>${r.ga}</td><td><b>${sign(r.gf-r.ga)}</b></td></tr>`).join("");
   document.getElementById("ties").innerHTML =
-    `<tr><th>대결</th><th>진행</th><th>승점</th><th>게임 합계</th></tr>`+
+    `<tr><th>팀</th><th>진행</th><th>승점</th><th>게임 합계</th></tr>`+
     tieRows().map(r=>`<tr><td>${chip(r.a)} vs ${chip(r.b)}</td><td>${r.done}/${r.tot}</td><td><b>${r.pa} : ${r.pb}</b></td><td>${r.ga} : ${r.gb}</td></tr>`).join("");
   const ps=playerStats().sort((a,b)=>a.p.localeCompare(b.p,"ko"));
   const rk=[...ps].sort((a,b)=>b.w-a.w||(b.gf-b.ga)-(a.gf-a.ga)||b.gf-a.gf)[0];
