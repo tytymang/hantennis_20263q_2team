@@ -207,10 +207,11 @@ select{font:500 15px var(--body);padding:8px 10px;border-radius:10px;border:1px 
 /* 기념사진: photos 폴더 파일명과 설명 (첫 번째 사진은 크게 표시) */
 /* 찬조: 이름과 금액(원) */
 const SPONSORS = [
-  { name: "한규용", note: "맥머핀 20개" },
-  { name: "신원석", amount: 100000 },
-  { name: "최현구", amount: 50000 },
-  // { name: "홍길동", amount: 100000 },
+  // amount: 금액(원), note: 비고(현금/물품), est: true면 추정 금액("약" 표시)
+  { name: "한규용", amount: 70000, note: "맥머핀 20개", est: true },
+  { name: "신원석", amount: 100000, note: "현금" },
+  { name: "최현구", amount: 50000, note: "현금" },
+  // { name: "홍길동", amount: 100000, note: "현금" },
 ];
 const PHOTOS = [
   { video: "photos/v01.mp4", poster: "photos/v01.jpg", cap: "2026 3Q 한테니스 분기대회 예고 영상" },
@@ -358,16 +359,17 @@ function renderSponsors(){
   const t=document.getElementById("sponsors"), none=document.getElementById("nospon");
   if(!SPONSORS.length){t.parentElement.hidden=true;none.hidden=false;return}
   t.parentElement.hidden=false;none.hidden=true;
-  const won=n=>Number(n).toLocaleString("ko-KR")+"원";
+  // 만원 단위 표시 (만원 미만은 원 단위로)
+  const man=n=>{n=Number(n)||0; return n%10000===0? (n/10000).toLocaleString("ko-KR")+"만원" : n.toLocaleString("ko-KR")+"원";};
   // 같은 사람이 여러 번 내면 한 줄로 합산
   const m=new Map();
-  for(const x of SPONSORS){const r=m.get(x.name)||{name:x.name,amount:0,notes:[]};
-    if(x.amount)r.amount+=Number(x.amount); if(x.note)r.notes.push(x.note); m.set(x.name,r);}
-  const rows=[...m.values()].map(r=>({name:r.name,amount:r.amount,note:r.notes.join(", ")}));
-  const total=rows.reduce((a,x)=>a+Number(x.amount||0),0);
-  t.innerHTML=`<tr><th style="text-align:left">이름</th><th style="text-align:right">찬조금</th></tr>`+
-    rows.map(x=>`<tr><td class="pname">${x.name}</td><td style="text-align:right">${[x.amount?won(x.amount):"",x.note].filter(Boolean).join(" + ")}</td></tr>`).join("")+
-    `<tr><td class="pname">합계</td><td style="text-align:right"><b>${[won(total),...rows.filter(x=>x.note).map(x=>x.note)].join(" + ")}</b></td></tr>`;
+  for(const x of SPONSORS){const r=m.get(x.name)||{name:x.name,amount:0,notes:[],est:false};
+    r.amount+=Number(x.amount||0); if(x.note&&!r.notes.includes(x.note))r.notes.push(x.note); if(x.est)r.est=true; m.set(x.name,r);}
+  const rows=[...m.values()];
+  const total=rows.reduce((a,x)=>a+x.amount,0), anyEst=rows.some(x=>x.est);
+  t.innerHTML=`<tr><th style="text-align:left">이름</th><th style="text-align:right">금액</th><th style="text-align:left;padding-left:14px">비고</th></tr>`+
+    rows.map(x=>`<tr><td class="pname">${x.name}</td><td style="text-align:right;white-space:nowrap">${x.est?"약 ":""}${man(x.amount)}</td><td style="text-align:left;padding-left:14px">${x.notes.join(", ")}</td></tr>`).join("")+
+    `<tr><td class="pname">합계</td><td style="text-align:right;white-space:nowrap"><b>${anyEst?"약 ":""}${man(total)}</b></td><td style="text-align:left;padding-left:14px;font-size:.85em;opacity:.75">${anyEst?"물품은 추정가 포함":""}</td></tr>`;
 }
 function renderPhotos(){
   const box=document.getElementById("photos");
