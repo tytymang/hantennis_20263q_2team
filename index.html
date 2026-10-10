@@ -113,10 +113,13 @@ select{font:500 15px var(--body);padding:8px 10px;border-radius:10px;border:1px 
 .side.right{justify-content:flex-end;text-align:right}
 .score{font-family:var(--body);font-weight:900;font-size:22px;min-width:64px;text-align:center;font-variant-numeric:tabular-nums}
 .score.none{font-family:var(--body);font-size:13px;color:var(--muted);font-weight:700}
-.side .names .nm{display:block;line-height:1.35}
+.side .names{display:flex;flex-wrap:wrap;column-gap:12px;row-gap:0;line-height:1.35}
+.side.right .names{justify-content:flex-end}
+.side .names .nm{white-space:nowrap}
+@media (min-width:560px){.side{justify-content:flex-end}.side.right{justify-content:flex-start}.row{gap:16px}}
 .win .names .nm:last-child::after{content:" 승";color:var(--win);font-weight:900;font-size:12px}
 .win.right .names .nm:last-child::after{content:none}
-.win.right .names .nm:last-child::before{content:"승 ";color:var(--win);font-weight:900;font-size:12px}
+.win.right .names .nm:first-child::before{content:"승 ";color:var(--win);font-weight:900;font-size:12px}
 .hl{outline:3px solid var(--ball);outline-offset:-1px}
 .mine{font-weight:900;text-decoration:underline;text-decoration-color:var(--ball);text-decoration-thickness:3px;text-underline-offset:3px}
 .teams{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
