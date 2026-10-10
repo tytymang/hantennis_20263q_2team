@@ -313,7 +313,7 @@ function renderProb(){
 
 function render(){
   renderProb();
-  document.getElementById("upd").textContent = UPDATED ? "최종 업데이트 "+UPDATED : "경기 시작 전 · 결과가 입력되면 자동 반영";
+  document.getElementById("upd").textContent = UPDATED ? "최종 업데이트 "+UPDATED : "경기 시작 전 · 경기 결과 업데이트 후 바로 확인 가능";
   const st=standings();
   document.getElementById("standings").innerHTML =
     `<tr><th>순위</th><th>팀</th><th>승점</th><th>경기</th><th>승</th><th>무</th><th>패</th><th>득</th><th>실</th><th>득실</th></tr>`+
