@@ -64,7 +64,7 @@ th{font-size:12.5px;color:var(--muted);font-weight:700}
 tr:last-child td{border-bottom:0}
 #sponsors th,#sponsors td{padding:10px 4px}
 @media (max-width:400px){#sponsors td{font-size:13.5px}}
-@media (max-width:370px){#sponsors td{font-size:13px}#sponsors .shine{font-size:.74em}}
+@media (max-width:370px){#sponsors th,#sponsors td{padding:10px 2px}#sponsors td{font-size:13px}#sponsors .shine{font-size:.74em}}
 .rank{font-family:var(--display);font-size:22px;font-weight:900;color:var(--ball)}
 .pts{font-weight:900;font-size:18px}
 .tchip{display:inline-flex;align-items:center;justify-content:center;min-width:24px;height:24px;border-radius:6px;color:#fff;font-weight:900;font-size:13px;padding:0 6px}
@@ -237,6 +237,7 @@ const SPONSORS = [
   { name: "최현구", amount: 50000, note: "현금" },
   { name: "황지영", amount: 50000, note: "현금" },
   { name: "박기훈", amount: 50000, note: "현금" },
+  { name: "추미라", amount: 54000, note: "커피 18잔" },   // 3,000원 × 18잔
   // { name: "홍길동", amount: 100000, note: "현금" },
 ];
 const PHOTOS = [
@@ -389,7 +390,7 @@ function renderSponsors(){
   if(!SPONSORS.length){t.parentElement.hidden=true;none.hidden=false;return}
   t.parentElement.hidden=false;none.hidden=true;
   // 만원 단위 표시 (만원 미만은 원 단위로)
-  const man=n=>{n=Number(n)||0; return n%10000===0? (n/10000).toLocaleString("ko-KR")+"만원" : n.toLocaleString("ko-KR")+"원";};
+  const man=n=>{n=Number(n)||0; return n%1000===0? (n/10000).toLocaleString("ko-KR",{maximumFractionDigits:1})+"만원" : n.toLocaleString("ko-KR")+"원";};
   // 같은 사람이 여러 번 내면 한 줄로 합산
   const m=new Map();
   for(const x of SPONSORS){const r=m.get(x.name)||{name:x.name,amount:0,notes:[],est:false};
