@@ -125,7 +125,7 @@ select{font:500 15px var(--body);padding:8px 10px;border-radius:10px;border:1px 
 .win.right .names .nm:first-child::before{content:"승 ";color:var(--win);font-weight:900;font-size:12px}
 .hl{outline:3px solid var(--ball);outline-offset:-1px}
 .mine{font-weight:900;text-decoration:underline;text-decoration-color:var(--ball);text-decoration-thickness:3px;text-underline-offset:3px}
-.teams{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.teams{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
 .team{padding:12px 10px}
 .team h3{margin:0 0 8px;font-size:15px;display:flex;gap:6px;align-items:center}
 .team ul{list-style:none;margin:0;padding:0;display:grid;gap:4px;font-size:14px}
@@ -133,7 +133,7 @@ select{font:500 15px var(--body);padding:8px 10px;border-radius:10px;border:1px 
 .team li span{color:var(--muted);font-size:12.5px;white-space:nowrap}
 .rules{padding:14px 16px;font-size:14px}
 .rules ul{margin:0;padding-left:18px;display:grid;gap:4px}
-@media (max-width:420px){.teams{grid-template-columns:1fr}.score{min-width:52px;font-size:20px}}
+@media (max-width:420px){.team{padding:10px 8px}.team ul{font-size:13.5px}.score{min-width:52px;font-size:20px}}
 @media (prefers-reduced-motion:no-preference){.g{transition:outline-color .2s}}
 
 .shine{display:inline-block;margin-left:3px;padding:1px 5px;border-radius:6px;white-space:nowrap;vertical-align:middle;
