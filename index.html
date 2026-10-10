@@ -113,7 +113,10 @@ select{font:500 15px var(--body);padding:8px 10px;border-radius:10px;border:1px 
 .side.right{justify-content:flex-end;text-align:right}
 .score{font-family:var(--body);font-weight:900;font-size:22px;min-width:64px;text-align:center;font-variant-numeric:tabular-nums}
 .score.none{font-family:var(--body);font-size:13px;color:var(--muted);font-weight:700}
-.win .names::after{content:" 승";color:var(--win);font-weight:900;font-size:12px}
+.side .names .nm{display:block;line-height:1.35}
+.win .names .nm:last-child::after{content:" 승";color:var(--win);font-weight:900;font-size:12px}
+.win.right .names .nm:last-child::after{content:none}
+.win.right .names .nm:last-child::before{content:"승 ";color:var(--win);font-weight:900;font-size:12px}
 .hl{outline:3px solid var(--ball);outline-offset:-1px}
 .mine{font-weight:900;text-decoration:underline;text-decoration-color:var(--ball);text-decoration-thickness:3px;text-underline-offset:3px}
 .teams{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
@@ -377,7 +380,7 @@ function renderGames(){
     ms.innerHTML=`${chip(r.t)}<b>${r.p}</b><span>${r.played}/${r.n}경기</span><span><b>${r.w}</b>승 ${r.d}무 ${r.l}패</span><span>득 ${r.gf} · 실 ${r.ga} (${sign(r.gf-r.ga)})</span>`;
     ms.hidden=false;} else ms.hidden=true;
   const list=GAMES.filter(g=>!who||g[5].includes(who)||g[7].includes(who));
-  const nm=ps=>ps.map(p=>p===who?`<span class="mine">${p}</span>`:p).join(" · ");
+  const nm=ps=>ps.map(p=>`<span class="nm">${p===who?`<span class="mine">${p}</span>`:p}</span>`).join("");
   document.getElementById("games").innerHTML = list.map(g=>{
     const r=RESULTS[g[0]]; const done=!!r;
     const lw=done&&r[0]>r[1], rw=done&&r[1]>r[0];
