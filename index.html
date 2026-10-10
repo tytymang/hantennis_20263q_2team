@@ -207,6 +207,9 @@ select{font:500 15px var(--body);padding:8px 10px;border-radius:10px;border:1px 
 /* 기념사진: photos 폴더 파일명과 설명 (첫 번째 사진은 크게 표시) */
 /* 찬조: 이름과 금액(원) */
 const SPONSORS = [
+  { name: "한규용", note: "맥머핀 20개" },
+  { name: "신원석", amount: 100000 },
+  { name: "최현구", amount: 50000 },
   // { name: "홍길동", amount: 100000 },
 ];
 const PHOTOS = [
@@ -364,7 +367,7 @@ function renderSponsors(){
   const total=rows.reduce((a,x)=>a+Number(x.amount||0),0);
   t.innerHTML=`<tr><th style="text-align:left">이름</th><th style="text-align:right">찬조금</th></tr>`+
     rows.map(x=>`<tr><td class="pname">${x.name}</td><td style="text-align:right">${[x.amount?won(x.amount):"",x.note].filter(Boolean).join(" + ")}</td></tr>`).join("")+
-    `<tr><td class="pname">합계</td><td style="text-align:right"><b>${won(total)}</b></td></tr>`;
+    `<tr><td class="pname">합계</td><td style="text-align:right"><b>${[won(total),...rows.filter(x=>x.note).map(x=>x.note)].join(" + ")}</b></td></tr>`;
 }
 function renderPhotos(){
   const box=document.getElementById("photos");
