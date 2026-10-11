@@ -260,6 +260,8 @@ const SPONSORS = [
   { name: "홍상현", amount: 50000, note: "현금" },
   { name: "김호규", amount: 100000, note: "현금" },
   { name: "임형준", amount: 50000, note: "현금" },
+  { name: "권정남", note: "귤", item: true },          // 금액 없이 물품만 (합계 제외)
+  { name: "김치용", note: "커피 4캔", item: true },
   // { name: "홍길동", amount: 100000, note: "현금" },
 ];
 const PHOTOS = [
@@ -498,15 +500,15 @@ function renderSponsors(){
   const man=n=>{n=Number(n)||0; return n%1000===0? (n/10000).toLocaleString("ko-KR",{maximumFractionDigits:1})+"만원" : n.toLocaleString("ko-KR")+"원";};
   // 같은 사람이 여러 번 내면 한 줄로 합산
   const m=new Map();
-  for(const x of SPONSORS){const r=m.get(x.name)||{name:x.name,amount:0,notes:[],est:false};
-    r.amount+=Number(x.amount||0); if(x.note&&!r.notes.includes(x.note))r.notes.push(x.note); if(x.est)r.est=true; if(x.shine)r.shine=x.shine; m.set(x.name,r);}
+  for(const x of SPONSORS){const r=m.get(x.name)||{name:x.name,amount:0,notes:[],est:false,item:true};
+    r.amount+=Number(x.amount||0); if(x.note&&!r.notes.includes(x.note))r.notes.push(x.note); if(x.est)r.est=true; if(!x.item)r.item=false; if(x.shine)r.shine=x.shine; m.set(x.name,r);}
   const rows=[...m.values()];
   // 폭죽: 점 10개가 방사형으로 퍼지는 작은 불꽃 (위치·색·타이밍만 다름)
   const fw=k=>`<span class="fw fw-${k}" aria-hidden="true">${Array.from({length:10},(_,i)=>`<i style="--r:${i*36}deg"></i>`).join("")}</span>`;
   const total=rows.reduce((a,x)=>a+x.amount,0), anyEst=rows.some(x=>x.est);
   t.innerHTML=`<tr><th style="text-align:left">이름</th><th style="text-align:right">금액</th><th style="text-align:left;padding-left:8px">비고</th></tr>`+
-    rows.map(x=>`<tr><td class="pname">${x.name}</td><td style="text-align:right;white-space:nowrap">${x.est?"약 ":""}${man(x.amount)}</td><td style="text-align:left;padding-left:8px;white-space:nowrap">${x.notes.join(", ")}${x.shine?` <span class="shine-wrap"><span class="shine">${x.shine}</span>${fw("a")}${fw("b")}${fw("c")}</span>`:""}</td></tr>`).join("")+
-    `<tr><td class="pname">합계</td><td style="text-align:right;white-space:nowrap"><b>${anyEst?"약 ":""}${man(total)}</b></td><td style="text-align:left;padding-left:8px;font-size:.85em;opacity:.75">${anyEst?"물품은 추정가 포함":""}</td></tr>`;
+    rows.map(x=>`<tr><td class="pname">${x.name}</td><td style="text-align:right;white-space:nowrap">${x.item&&!x.amount?'<span style="opacity:.7">물품</span>':(x.est?"약 ":"")+man(x.amount)}</td><td style="text-align:left;padding-left:8px;white-space:nowrap">${x.notes.join(", ")}${x.shine?` <span class="shine-wrap"><span class="shine">${x.shine}</span>${fw("a")}${fw("b")}${fw("c")}</span>`:""}</td></tr>`).join("")+
+    `<tr><td class="pname">합계</td><td style="text-align:right;white-space:nowrap"><b>${anyEst?"약 ":""}${man(total)}</b></td><td style="text-align:left;padding-left:8px;font-size:.8em;opacity:.75;white-space:normal;line-height:1.35">${[anyEst?"물품은 추정가 포함":"",rows.some(x=>x.item&&!x.amount)?"'물품'은 합계 제외":""].filter(Boolean).join(" · ")}</td></tr>`;
 }
 function renderPhotos(){
   const box=document.getElementById("photos");
