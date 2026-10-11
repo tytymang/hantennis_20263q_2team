@@ -150,7 +150,10 @@ select{font:500 15px var(--body);padding:8px 10px;border-radius:10px;border:1px 
   20%,24%,55%{opacity:.55;text-shadow:none}}
 @media (prefers-reduced-motion:reduce){.shine{animation:none}}
 .shine-wrap{position:relative;display:inline-block;vertical-align:middle}
-.mvpw{margin-right:6px}.mvpw .shine{margin-left:0;font-size:11px;padding:1px 6px;letter-spacing:.04em}
+.mvpw{margin-right:6px}
+.shine.nn{margin-left:5px;font-size:11px;padding:1px 5px;border-color:#4fe3ff;color:#effcff;text-shadow:0 0 2px #fff,0 0 6px #4fe3ff,0 0 12px #4fe3ff;box-shadow:0 0 6px #4fe3ff,0 0 14px rgba(79,227,255,.5),inset 0 0 8px rgba(79,227,255,.4);animation:neonb 3.4s infinite}
+@keyframes neonb{0%,30%,34%,70%,100%{opacity:1}32%,72%{opacity:.5}}
+@media (prefers-reduced-motion:reduce){.shine.nn{animation:none}}.mvpw .shine{margin-left:0;font-size:11px;padding:1px 6px;letter-spacing:.04em}
 .fw{position:absolute;width:0;height:0;pointer-events:none}
 .fw i{position:absolute;left:-2px;top:-2px;width:4px;height:4px;border-radius:50%;background:var(--c);
   box-shadow:0 0 6px var(--c),0 0 2px #fff;opacity:0;transform:rotate(var(--r)) translateY(0);animation:burst 1.6s ease-out infinite;animation-delay:var(--d)}
@@ -414,7 +417,7 @@ function render(){
   const mvpSet=new Set(); Object.keys(TEAMS).forEach(t=>mvpTop(ps.filter(r=>r.t===t),t).forEach(r=>mvpSet.add(r.p)));
   // 팀별 순위: 승 → 게임 득실 → 득 (동률은 같은 순위, 표시는 이름순)
   const cmp=(a,b)=>b.w-a.w||(b.gf-b.ga)-(a.gf-a.ga)||b.gf-a.gf;
-  const row=(r,rk)=>`<tr><td class="rank">${rk}</td><td class="pname">${mvpSet.has(r.p)?(MVP_NEON.includes(r.p)?`<span class="shine-wrap mvpw"><span class="shine">MVP</span>${fwHTML('a')}${fwHTML('b')}${fwHTML('c')}</span>`:'<span class="vipb">MVP</span>'):''}${r.p}</td><td>${r.played}/${r.n}</td><td><b>${r.w}</b></td><td>${r.d}</td><td>${r.l}</td><td>${r.gf}</td><td>${r.ga}</td><td><b>${sign(r.gf-r.ga)}</b></td></tr>`;
+  const row=(r,rk)=>`<tr><td class="rank">${rk}</td><td class="pname">${mvpSet.has(r.p)?(MVP_NEON.includes(r.p)?`<span class="shine-wrap mvpw"><span class="shine">MVP</span>${fwHTML('a')}${fwHTML('b')}${fwHTML('c')}</span>`:'<span class="vipb">MVP</span>'):''}${r.p}${NAME_NEON[r.p]?`<span class="shine nn">${NAME_NEON[r.p]}</span>`:''}</td><td>${r.played}/${r.n}</td><td><b>${r.w}</b></td><td>${r.d}</td><td>${r.l}</td><td>${r.gf}</td><td>${r.ga}</td><td><b>${sign(r.gf-r.ga)}</b></td></tr>`;
   document.getElementById("players").innerHTML =
     `<tr><th>순위</th><th>선수</th><th>경기</th><th>승</th><th>무</th><th>패</th><th>득</th><th>실</th><th>득실</th></tr>`+
     Object.keys(TEAMS).map(t=>{
@@ -435,6 +438,8 @@ function render(){
 const MVP_TIEBREAK = { T1: "홍상현" };
 // 네온 강조 + 축포를 붙일 MVP
 const MVP_NEON = ["홍상현"];
+// 이름 옆 네온 문구
+const NAME_NEON = { "정은혜": "아쉬비" };
 const fwHTML=k=>`<span class="fw fw-${k}" aria-hidden="true">${Array.from({length:10},(_,i)=>`<i style="--r:${i*36}deg"></i>`).join("")}</span>`;
 function mvpTop(list,t){
   const st=list.filter(r=>r.played>0).sort((a,b)=>b.w-a.w||(b.gf-b.ga)-(a.gf-a.ga)||b.gf-a.gf);
