@@ -526,7 +526,11 @@ function openLB(src){
     im.src=p.src; im.alt=p.cap||"기념사진"; cnt.textContent=(i+1)+" / "+list.length; cap.textContent=p.cap||"";
     dl.href=p.src; dl.setAttribute("download","한테니스_2026_3분기_"+String(i+1).padStart(2,"0")+".jpg");
     [list[(i+1)%list.length],list[(i-1+list.length)%list.length]].forEach(q=>{const x=new Image(); x.src=q.src;});};
-  const close=()=>{lb.remove(); document.removeEventListener("keydown",key); document.body.style.overflow="";};
+  // 휴대폰 '뒤로 가기'를 누르면 확대 화면만 닫히고 사진 목록으로 돌아감
+  let closed=false;
+  const teardown=()=>{if(closed)return; closed=true; lb.remove(); document.removeEventListener("keydown",key); window.removeEventListener("popstate",onPop); document.body.style.overflow="";};
+  const onPop=()=>teardown();
+  const close=()=>{if(closed)return; if(history.state&&history.state.lb){history.back();} else teardown();};
   const key=e=>{if(e.key==="ArrowRight")show(i+1); else if(e.key==="ArrowLeft")show(i-1); else if(e.key==="Escape")close();};
   lb.querySelector(".lb-prev").addEventListener("click",e=>{e.stopPropagation();show(i-1);});
   lb.querySelector(".lb-next").addEventListener("click",e=>{e.stopPropagation();show(i+1);});
@@ -538,6 +542,8 @@ function openLB(src){
   lb.addEventListener("touchend",e=>{if(sx===null)return; const dx=e.changedTouches[0].clientX-sx, dy=e.changedTouches[0].clientY-sy; sx=null;
     if(Math.abs(dx)>40&&Math.abs(dx)>Math.abs(dy)) show(dx<0?i+1:i-1);},{passive:true});
   document.addEventListener("keydown",key); document.body.style.overflow="hidden";
+  try{history.pushState({lb:1},"");}catch(e){}
+  window.addEventListener("popstate",onPop);
   document.body.appendChild(lb); show(i);
 }
 function renderGames(){
