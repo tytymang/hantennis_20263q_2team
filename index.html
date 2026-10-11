@@ -193,7 +193,7 @@ select{font:500 15px var(--body);padding:8px 10px;border-radius:10px;border:1px 
     <div class="card tbl"><table id="ties"></table></div>
     <h2>개인 성적</h2>
     <div class="card tbl"><table id="players"></table></div>
-    <p class="note">이름순 정렬. VIP 선정: 승 → 게임 득실 → 득. 득·실은 본인이 뛴 경기의 게임 수 합계</p>
+    <p class="note">이름순 정렬. MVP 선정: 승 → 게임 득실 → 득. 득·실은 본인이 뛴 경기의 게임 수 합계</p>
   </section>
 
   <section id="p-games" hidden>
@@ -367,7 +367,7 @@ function render(){
   document.getElementById("players").innerHTML =
     `<tr><th>선수</th><th>경기</th><th>승</th><th>무</th><th>패</th><th>득</th><th>실</th><th>득실</th></tr>`+
     ps.map(r=>{const vip=rk.played>0&&r.played>0&&r.w===rk.w&&(r.gf-r.ga)===(rk.gf-rk.ga)&&r.gf===rk.gf;
-      return `<tr><td class="pname">${vip?'<span class="vipb">VIP</span>':''}${chip(r.t)}${r.p}</td><td>${r.played}/${r.n}</td><td><b>${r.w}</b></td><td>${r.d}</td><td>${r.l}</td><td>${r.gf}</td><td>${r.ga}</td><td><b>${sign(r.gf-r.ga)}</b></td></tr>`}).join("");
+      return `<tr><td class="pname">${vip?'<span class="vipb">MVP</span>':''}${chip(r.t)}${r.p}</td><td>${r.played}/${r.n}</td><td><b>${r.w}</b></td><td>${r.d}</td><td>${r.l}</td><td>${r.gf}</td><td>${r.ga}</td><td><b>${sign(r.gf-r.ga)}</b></td></tr>`}).join("");
   renderSponsors();
   renderPhotos();
   renderGames();
@@ -386,8 +386,8 @@ function renderVip(){
   const top=st.filter(r=>key(r).join()===key(st[0]).join());
   const fin=done===GAMES.length;
   const r=top[0];
-  el.innerHTML=`<div class="medal">VIP</div>
-    <div class="lbl">${fin?"오늘의 VIP":"현재 VIP 1위 · "+done+"/"+GAMES.length+"경기 진행"}${top.length>1?" · 공동 "+top.length+"명":""}</div>
+  el.innerHTML=`<div class="medal">MVP</div>
+    <div class="lbl">${fin?"오늘의 MVP":"현재 MVP 1위 · "+done+"/"+GAMES.length+"경기 진행"}${top.length>1?" · 공동 "+top.length+"명":""}</div>
     <div class="who">${top.map(x=>chip(x.t)+" "+x.p).join(" ")}</div>
     <div class="rec"><b>${r.w}</b>승 ${r.d}무 ${r.l}패 · 게임 득실 <b>${sign(r.gf-r.ga)}</b> (득 ${r.gf} · 실 ${r.ga})</div>`;
   el.hidden=false;
