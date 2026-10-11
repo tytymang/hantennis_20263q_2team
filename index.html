@@ -76,11 +76,12 @@ select{font:500 15px var(--body);padding:8px 10px;border-radius:10px;border:1px 
 .games{display:grid;gap:10px}
 .vipb{display:inline-block;background:var(--ball);color:var(--gold-ink);font-weight:900;font-size:11px;border-radius:5px;padding:1px 6px;margin-right:6px;vertical-align:1px;letter-spacing:.04em}
 .vip{margin-bottom:14px;background:var(--surface);border:2px solid var(--ball);border-radius:16px;padding:16px 18px;display:grid;grid-template-columns:auto 1fr;gap:4px 14px;align-items:center}
-.vip .medal{grid-row:1/4;width:64px;height:64px;border-radius:50%;background:var(--ball);color:#1d2410;display:flex;align-items:center;justify-content:center;font-family:var(--display);font-size:22px;letter-spacing:.5px}
+.vip .medal{grid-row:1/span 5;width:64px;height:64px;border-radius:50%;background:var(--ball);color:#1d2410;display:flex;align-items:center;justify-content:center;font-family:var(--display);font-size:22px;letter-spacing:.5px}
 .vip .lbl{font-size:12.5px;font-weight:900;color:var(--muted);letter-spacing:.06em}
-.vip .who{font-family:var(--display);font-size:30px;line-height:1.15;display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-width:0}
+.vip .who{font-family:var(--display);font-size:24px;margin-top:6px;line-height:1.15;display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-width:0}
 .vip .rec{font-size:14.5px;font-weight:700}
 .vip .rec b{font-size:17px}
+.vip .co{font-family:inherit;font-size:12px;font-weight:800;color:var(--muted)}
 .photos{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
 .photos figure{margin:0;background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
 .photos button{display:block;width:100%;padding:0;border:0;background:none;cursor:zoom-in}
@@ -193,7 +194,7 @@ select{font:500 15px var(--body);padding:8px 10px;border-radius:10px;border:1px 
     <div class="card tbl"><table id="ties"></table></div>
     <h2>개인 성적</h2>
     <div class="card tbl"><table id="players"></table></div>
-    <p class="note">이름순 정렬. MVP 선정: 승 → 게임 득실 → 득. 득·실은 본인이 뛴 경기의 게임 수 합계</p>
+    <p class="note">이름순 정렬. MVP: 팀별 1위(승 → 게임 득실 → 득). 득·실은 본인이 뛴 경기의 게임 수 합계</p>
   </section>
 
   <section id="p-games" hidden>
@@ -363,10 +364,10 @@ function render(){
     `<tr><th>팀</th><th>진행</th><th>승점</th><th>게임 합계</th></tr>`+
     tieRows().map(r=>`<tr><td>${chip(r.a)} vs ${chip(r.b)}</td><td>${r.done}/${r.tot}</td><td><b>${r.pa} : ${r.pb}</b></td><td>${r.ga} : ${r.gb}</td></tr>`).join("");
   const ps=playerStats().sort((a,b)=>a.p.localeCompare(b.p,"ko"));
-  const rk=[...ps].sort((a,b)=>b.w-a.w||(b.gf-b.ga)-(a.gf-a.ga)||b.gf-a.gf)[0];
+  const mvpSet=new Set(); Object.keys(TEAMS).forEach(t=>mvpTop(ps.filter(r=>r.t===t)).forEach(r=>mvpSet.add(r.p)));
   document.getElementById("players").innerHTML =
     `<tr><th>선수</th><th>경기</th><th>승</th><th>무</th><th>패</th><th>득</th><th>실</th><th>득실</th></tr>`+
-    ps.map(r=>{const vip=rk.played>0&&r.played>0&&r.w===rk.w&&(r.gf-r.ga)===(rk.gf-rk.ga)&&r.gf===rk.gf;
+    ps.map(r=>{const vip=mvpSet.has(r.p);
       return `<tr><td class="pname">${vip?'<span class="vipb">MVP</span>':''}${chip(r.t)}${r.p}</td><td>${r.played}/${r.n}</td><td><b>${r.w}</b></td><td>${r.d}</td><td>${r.l}</td><td>${r.gf}</td><td>${r.ga}</td><td><b>${sign(r.gf-r.ga)}</b></td></tr>`}).join("");
   renderSponsors();
   renderPhotos();
@@ -376,20 +377,25 @@ function render(){
       ps.map(p=>{const n=GAMES.filter(g=>g[5].includes(p)||g[7].includes(p)).length;return `<li>${p}<span>${n}경기</span></li>`}).join("")+`</ul></div>`;
   }).join("");
 }
+// MVP: 팀별 1위 (승 → 게임 득실 → 득)
+function mvpTop(list){
+  const st=list.filter(r=>r.played>0).sort((a,b)=>b.w-a.w||(b.gf-b.ga)-(a.gf-a.ga)||b.gf-a.gf);
+  if(!st.length) return [];
+  const k=r=>[r.w,r.gf-r.ga,r.gf].join();
+  return st.filter(r=>k(r)===k(st[0]));
+}
 function renderVip(){
   const el=document.getElementById("vip");
   const done=GAMES.filter(g=>RESULTS[g[0]]).length;
-  const st=playerStats().filter(r=>r.played>0);
-  if(!st.length){el.hidden=true;return}
-  const key=r=>[r.w,r.gf-r.ga,r.gf];
-  st.sort((a,b)=>b.w-a.w||(b.gf-b.ga)-(a.gf-a.ga)||b.gf-a.gf);
-  const top=st.filter(r=>key(r).join()===key(st[0]).join());
+  const all=playerStats();
+  const rows=Object.keys(TEAMS).map(t=>({t,top:mvpTop(all.filter(r=>r.t===t))})).filter(x=>x.top.length);
+  if(!rows.length){el.hidden=true;return}
   const fin=done===GAMES.length;
-  const r=top[0];
   el.innerHTML=`<div class="medal">MVP</div>
-    <div class="lbl">${fin?"오늘의 MVP":"현재 MVP 1위 · "+done+"/"+GAMES.length+"경기 진행"}${top.length>1?" · 공동 "+top.length+"명":""}</div>
-    <div class="who">${top.map(x=>chip(x.t)+" "+x.p).join(" ")}</div>
-    <div class="rec"><b>${r.w}</b>승 ${r.d}무 ${r.l}패 · 게임 득실 <b>${sign(r.gf-r.ga)}</b> (득 ${r.gf} · 실 ${r.ga})</div>`;
+    <div class="lbl">${fin?"오늘의 MVP · 팀별 1위":"현재 팀별 MVP · "+done+"/"+GAMES.length+"경기 진행"}</div>`+
+    rows.map(({t,top})=>{const r=top[0];
+      return `<div class="who">${chip(t)} ${top.map(x=>x.p).join(" · ")}${top.length>1?' <small class="co">공동 '+top.length+'명</small>':''}</div>
+    <div class="rec"><b>${r.w}</b>승 ${r.d}무 ${r.l}패 · 게임 득실 <b>${sign(r.gf-r.ga)}</b> (득 ${r.gf} · 실 ${r.ga})</div>`}).join("");
   el.hidden=false;
 }
 function renderSponsors(){
