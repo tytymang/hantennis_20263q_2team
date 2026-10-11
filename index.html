@@ -154,7 +154,8 @@ select{font:500 15px var(--body);padding:8px 10px;border-radius:10px;border:1px 
 .shine.nn{margin-left:5px;font-size:11px;padding:1px 5px;border-color:#4fe3ff;color:#effcff;text-shadow:0 0 2px #fff,0 0 6px #4fe3ff,0 0 12px #4fe3ff;box-shadow:0 0 6px #4fe3ff,0 0 14px rgba(79,227,255,.5),inset 0 0 8px rgba(79,227,255,.4);animation:neonb 3.4s infinite}
 @keyframes neonb{0%,30%,34%,70%,100%{opacity:1}32%,72%{opacity:.5}}
 @media (prefers-reduced-motion:reduce){.shine.nn{animation:none}}
-@media (max-width:400px){.shine.nn{margin-left:3px;font-size:9.5px;padding:1px 3px;letter-spacing:-.04em}#players th,#players td{padding-left:3px;padding-right:3px}#players td:not(.rank){font-size:14px}}.mvpw .shine{margin-left:0;font-size:11px;padding:1px 6px;letter-spacing:.04em}
+.shine.nn.nnb{display:block;width:max-content;margin:5px 0 0}
+@media (max-width:400px){.shine.nn{display:block;width:max-content;margin:5px 0 0;font-size:9.5px;padding:1px 3px;letter-spacing:-.05em}#players th,#players td{padding-left:3px;padding-right:3px}#players td:not(.rank){font-size:14px}}.mvpw .shine{margin-left:0;font-size:11px;padding:1px 6px;letter-spacing:.04em}
 .fw{position:absolute;width:0;height:0;pointer-events:none}
 .fw i{position:absolute;left:-2px;top:-2px;width:4px;height:4px;border-radius:50%;background:var(--c);
   box-shadow:0 0 6px var(--c),0 0 2px #fff;opacity:0;transform:rotate(var(--r)) translateY(0);animation:burst 1.6s ease-out infinite;animation-delay:var(--d)}
@@ -201,7 +202,7 @@ select{font:500 15px var(--body);padding:8px 10px;border-radius:10px;border:1px 
     <div class="card tbl"><table id="ties"></table></div>
     <h2>개인 성적</h2>
     <div class="card tbl"><table id="players"></table></div>
-    <p class="note">팀별 순위순 정렬(승 → 게임 득실 → 득, 동률은 같은 순위). MVP: 팀별 1위(승 → 게임 득실 → 득, 끝까지 동률이면 연장자 우선). 득·실은 본인이 뛴 경기의 게임 수 합계</p>
+    <p class="note">팀별 순위순 정렬(승 → 게임 득실 → 득, 동률은 같은 순위). MVP: 팀별 1위(승 → 게임 득실 → 득, 끝까지 동률이면 공동 MVP). 득·실은 본인이 뛴 경기의 게임 수 합계</p>
   </section>
 
   <section id="p-games" hidden>
@@ -291,10 +292,23 @@ const PHOTOS = [
   { src: "photos/33.jpg", cap: "혼복 · 경기 전 기념" },
   { src: "photos/34.jpg", cap: "혼복 · 경기 전 기념" },
   { src: "photos/35.jpg", cap: "남복 · 경기 전 기념" },
+  { src: "photos/36.jpg", cap: "시상식" },
+  { src: "photos/37.jpg", cap: "시상식" },
+  { src: "photos/38.jpg", cap: "시상식" },
+  { src: "photos/39.jpg", cap: "시상식" },
+  { src: "photos/40.jpg", cap: "시상식 · 기념" },
+  { src: "photos/41.jpg", cap: "시상식 · 세리머니" },
+  { src: "photos/42.jpg", cap: "시상식 · 세리머니" },
+  { src: "photos/43.jpg", cap: "시상식" },
+  { src: "photos/44.jpg", cap: "시상식" },
+  { src: "photos/45.jpg", cap: "시상식" },
+  { src: "photos/46.jpg", cap: "시상식 · 기념" },
+  { src: "photos/47.jpg", cap: "시상식" },
+  { src: "photos/48.jpg", cap: "시상식" },
   // { src: "photos/01.jpg", cap: "단체 사진" },
   // 동영상: { video: "photos/v01.mp4", poster: "photos/v01.jpg", cap: "설명" },
 ];
-const UPDATED = "10/11 11:31";            // 예: "10/11 10:25"
+const UPDATED = "10/11 12:32";            // 예: "10/11 10:25"
 const RESULTS = {
   // 1: [6, 3],
   1: [6, 0],
@@ -420,7 +434,7 @@ function render(){
   const mvpSet=new Set(); Object.keys(TEAMS).forEach(t=>mvpTop(ps.filter(r=>r.t===t),t).forEach(r=>mvpSet.add(r.p)));
   // 팀별 순위: 승 → 게임 득실 → 득 (동률은 같은 순위, 표시는 이름순)
   const cmp=(a,b)=>b.w-a.w||(b.gf-b.ga)-(a.gf-a.ga)||b.gf-a.gf;
-  const row=(r,rk)=>`<tr><td class="rank">${rk}</td><td class="pname">${mvpSet.has(r.p)?(MVP_NEON.includes(r.p)?`<span class="shine-wrap mvpw"><span class="shine">MVP</span>${fwHTML('a')}${fwHTML('b')}${fwHTML('c')}</span>`:'<span class="vipb">MVP</span>'):''}${r.p}${NAME_NEON[r.p]?`<span class="shine nn">${NAME_NEON[r.p]}</span>`:''}</td><td>${r.played}/${r.n}</td><td><b>${r.w}</b></td><td>${r.d}</td><td>${r.l}</td><td>${r.gf}</td><td>${r.ga}</td><td><b>${sign(r.gf-r.ga)}</b></td></tr>`;
+  const row=(r,rk)=>`<tr><td class="rank">${rk}</td><td class="pname">${mvpSet.has(r.p)?(MVP_NEON.includes(r.p)?`<span class="shine-wrap mvpw"><span class="shine">MVP</span>${fwHTML('a')}${fwHTML('b')}${fwHTML('c')}</span>`:'<span class="vipb">MVP</span>'):''}${r.p}${NAME_NEON[r.p]?`<span class="shine nn${NAME_NEON[r.p].length>8?' nnb':''}">${NAME_NEON[r.p]}</span>`:''}</td><td>${r.played}/${r.n}</td><td><b>${r.w}</b></td><td>${r.d}</td><td>${r.l}</td><td>${r.gf}</td><td>${r.ga}</td><td><b>${sign(r.gf-r.ga)}</b></td></tr>`;
   document.getElementById("players").innerHTML =
     `<tr><th>순위</th><th>선수</th><th>경기</th><th>승</th><th>무</th><th>패</th><th>득</th><th>실</th><th>득실</th></tr>`+
     Object.keys(TEAMS).map(t=>{
@@ -437,12 +451,12 @@ function render(){
       ps.map(p=>{const n=GAMES.filter(g=>g[5].includes(p)||g[7].includes(p)).length;return `<li>${p}<span>${n}경기</span></li>`}).join("")+`</ul></div>`;
   }).join("");
 }
-// MVP: 팀별 1위 (승 → 게임 득실 → 득). 끝까지 동률이면 아래 지정 선수(연장자 우선, 운영진 결정)
-const MVP_TIEBREAK = { T1: "홍상현" };
+// MVP: 팀별 1위 (승 → 게임 득실 → 득). 끝까지 동률이면 공동 MVP (지정 시 해당 선수 단독)
+const MVP_TIEBREAK = {};
 // 네온 강조 + 축포를 붙일 MVP
-const MVP_NEON = ["홍상현"];
+const MVP_NEON = ["홍상현","정은혜"];
 // 이름 옆 네온 문구
-const NAME_NEON = { "정은혜": "아까비 나이" };
+const NAME_NEON = { "정은혜": "가위바위보 승 · 상품권 획득", "신원석": "줬다 뺏어감" };
 const fwHTML=k=>`<span class="fw fw-${k}" aria-hidden="true">${Array.from({length:10},(_,i)=>`<i style="--r:${i*36}deg"></i>`).join("")}</span>`;
 function mvpTop(list,t){
   const st=list.filter(r=>r.played>0).sort((a,b)=>b.w-a.w||(b.gf-b.ga)-(a.gf-a.ga)||b.gf-a.gf);
