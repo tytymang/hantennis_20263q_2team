@@ -104,6 +104,9 @@ select{font:500 15px var(--body);padding:8px 10px;border-radius:10px;border:1px 
 .mysum{padding:12px 14px;margin-bottom:12px;font-size:14.5px;display:flex;gap:6px 14px;flex-wrap:wrap;align-items:center}
 .mysum b{font-size:16px}
 .pname{text-align:left;font-weight:700}
+#overall .ov .tchip{margin-right:6px}
+#overall .rv{display:block;margin-top:3px;font-size:12px;font-weight:500;color:var(--muted);white-space:normal;line-height:1.35}
+#overall th,#overall td{padding-left:4px;padding-right:4px}
 #players tr.tsep td{text-align:left;padding:12px 6px 6px;background:var(--surface);border-bottom:1px solid var(--line)}
 #players th,#players td{padding-left:4px;padding-right:4px}
 .pname .tchip{margin-right:6px;min-width:22px;height:22px;font-size:12px}
@@ -211,6 +214,9 @@ select{font:500 15px var(--body);padding:8px 10px;border-radius:10px;border:1px 
     <h2>개인 성적</h2>
     <div class="card tbl"><table id="players"></table></div>
     <p class="note">팀별 순위순 정렬(승 → 게임 득실 → 득, 동률은 같은 순위). MVP: 팀별 1위(승 → 게임 득실 → 득, 끝까지 동률이면 공동 MVP). 득·실은 본인이 뛴 경기의 게임 수 합계</p>
+    <h2>종합 개인 순위</h2>
+    <div class="card tbl"><table id="overall"></table></div>
+    <p class="note">팀 구분 없이 승 → 게임 득실 → 득 순. 한줄평은 오늘 경기 결과 기준</p>
   </section>
 
   <section id="p-games" hidden>
@@ -442,6 +448,7 @@ function render(){
     `<tr><th>팀</th><th>진행</th><th>승점</th><th>게임 합계</th></tr>`+
     tieRows().map(r=>`<tr><td>${chip(r.a)} vs ${chip(r.b)}</td><td>${r.done}/${r.tot}</td><td><b>${r.pa} : ${r.pb}</b></td><td>${r.ga} : ${r.gb}</td></tr>`).join("");
   const ps=playerStats().sort((a,b)=>a.p.localeCompare(b.p,"ko"));
+  renderOverall(ps);
   const mvpSet=new Set(); Object.keys(TEAMS).forEach(t=>mvpTop(ps.filter(r=>r.t===t),t).forEach(r=>mvpSet.add(r.p)));
   // 팀별 순위: 승 → 게임 득실 → 득 (동률은 같은 순위, 표시는 이름순)
   const cmp=(a,b)=>b.w-a.w||(b.gf-b.ga)-(a.gf-a.ga)||b.gf-a.gf;
@@ -477,6 +484,22 @@ function mvpTop(list,t){
   const pick=t&&MVP_TIEBREAK[t];
   if(top.length>1&&pick&&top.some(r=>r.p===pick)) return top.filter(r=>r.p===pick);
   return top;
+}
+// 종합 개인 순위 + 한줄평 (오늘 결과 기준)
+const REVIEW = {
+  "정은혜":"3전 전승, 혼복·여복 모두 접수", "홍상현":"3전 전승, MVP다운 활약", "박명선":"2전 전승, 6:0 완봉승",
+  "권정남":"2승 1무 무패, 여복 에이스", "허\u00a0\u00a0선":"2승 1무 무패, 후반 2연승", "이항준":"무패, 마지막 경기 승리로 마무리",
+  "신원석":"레드 MVP, 6:2 대승 주역", "김치용":"1승 1무 1패, 끝까지 접전", "박기훈":"6:2 대승으로 레드 첫 승",
+  "한규용":"2무, 지지 않는 테니스", "최현구":"2무, 끈질긴 승부", "임형준":"5:5 접전 두 번, 투혼",
+  "박태준":"5:5 무승부 이끈 투혼", "문보선":"5:5 무승부로 팀 승점 보탬", "김호규":"5:5 접전으로 승점 보탬",
+  "추미라":"3경기 모두 출전, 끝까지 분투", "오은선":"3경기 풀타임, 혼복 5:5", "황지영":"다음 대회 반등 기대"
+};
+function renderOverall(ps){
+  const cmp=(a,b)=>b.w-a.w||(b.gf-b.ga)-(a.gf-a.ga)||b.gf-a.gf;
+  const list=ps.filter(r=>r.played>0).sort((a,b)=>cmp(a,b)||a.p.localeCompare(b.p,"ko"));
+  document.getElementById("overall").innerHTML=`<tr><th>순위</th><th style="text-align:left">선수 · 한줄평</th><th>승-무-패</th><th>득실</th></tr>`+
+    list.map((r,i)=>{let k=i; while(k>0&&cmp(list[k-1],r)===0)k--;
+      return `<tr><td class="rank">${k+1}</td><td class="pname ov">${chip(r.t)}${r.p}<span class="rv">${REVIEW[r.p]||""}</span></td><td>${r.w}-${r.d}-${r.l}</td><td><b>${sign(r.gf-r.ga)}</b></td></tr>`;}).join("");
 }
 function renderVip(){
   const el=document.getElementById("vip");
