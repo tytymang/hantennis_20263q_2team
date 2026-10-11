@@ -96,6 +96,8 @@ select{font:500 15px var(--body);padding:8px 10px;border-radius:10px;border:1px 
 .mysum{padding:12px 14px;margin-bottom:12px;font-size:14.5px;display:flex;gap:6px 14px;flex-wrap:wrap;align-items:center}
 .mysum b{font-size:16px}
 .pname{text-align:left;font-weight:700}
+#players tr.tsep td{text-align:left;padding:12px 6px 6px;background:var(--surface);border-bottom:1px solid var(--line)}
+#players th,#players td{padding-left:4px;padding-right:4px}
 .pname .tchip{margin-right:6px;min-width:22px;height:22px;font-size:12px}
 .g{padding:12px 12px 10px}
 .g .top{display:flex;gap:8px;align-items:center;font-size:13px;color:var(--muted);margin-bottom:8px;flex-wrap:wrap}
@@ -194,7 +196,7 @@ select{font:500 15px var(--body);padding:8px 10px;border-radius:10px;border:1px 
     <div class="card tbl"><table id="ties"></table></div>
     <h2>개인 성적</h2>
     <div class="card tbl"><table id="players"></table></div>
-    <p class="note">이름순 정렬. MVP: 팀별 1위(승 → 게임 득실 → 득). 득·실은 본인이 뛴 경기의 게임 수 합계</p>
+    <p class="note">팀별 순위순 정렬(승 → 게임 득실 → 득, 동률은 같은 순위). MVP: 팀별 1위(승 → 게임 득실 → 득). 득·실은 본인이 뛴 경기의 게임 수 합계</p>
   </section>
 
   <section id="p-games" hidden>
@@ -404,10 +406,16 @@ function render(){
     tieRows().map(r=>`<tr><td>${chip(r.a)} vs ${chip(r.b)}</td><td>${r.done}/${r.tot}</td><td><b>${r.pa} : ${r.pb}</b></td><td>${r.ga} : ${r.gb}</td></tr>`).join("");
   const ps=playerStats().sort((a,b)=>a.p.localeCompare(b.p,"ko"));
   const mvpSet=new Set(); Object.keys(TEAMS).forEach(t=>mvpTop(ps.filter(r=>r.t===t)).forEach(r=>mvpSet.add(r.p)));
+  // 팀별 순위: 승 → 게임 득실 → 득 (동률은 같은 순위, 표시는 이름순)
+  const cmp=(a,b)=>b.w-a.w||(b.gf-b.ga)-(a.gf-a.ga)||b.gf-a.gf;
+  const row=(r,rk)=>`<tr><td class="rank">${rk}</td><td class="pname">${mvpSet.has(r.p)?'<span class="vipb">MVP</span>':''}${r.p}</td><td>${r.played}/${r.n}</td><td><b>${r.w}</b></td><td>${r.d}</td><td>${r.l}</td><td>${r.gf}</td><td>${r.ga}</td><td><b>${sign(r.gf-r.ga)}</b></td></tr>`;
   document.getElementById("players").innerHTML =
-    `<tr><th>선수</th><th>경기</th><th>승</th><th>무</th><th>패</th><th>득</th><th>실</th><th>득실</th></tr>`+
-    ps.map(r=>{const vip=mvpSet.has(r.p);
-      return `<tr><td class="pname">${vip?'<span class="vipb">MVP</span>':''}${chip(r.t)}${r.p}</td><td>${r.played}/${r.n}</td><td><b>${r.w}</b></td><td>${r.d}</td><td>${r.l}</td><td>${r.gf}</td><td>${r.ga}</td><td><b>${sign(r.gf-r.ga)}</b></td></tr>`}).join("");
+    `<tr><th>순위</th><th>선수</th><th>경기</th><th>승</th><th>무</th><th>패</th><th>득</th><th>실</th><th>득실</th></tr>`+
+    Object.keys(TEAMS).map(t=>{
+      const list=ps.filter(r=>r.t===t).sort((a,b)=>cmp(a,b)||a.p.localeCompare(b.p,"ko"));
+      return `<tr class="tsep"><td colspan="9">${chip(t,true)}</td></tr>`+
+        list.map((r,i)=>{let k=i; while(k>0&&cmp(list[k-1],r)===0)k--; return row(r,k+1);}).join("");
+    }).join("");
   renderSponsors();
   renderPhotos();
   renderGames();
