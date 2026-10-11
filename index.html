@@ -150,6 +150,7 @@ select{font:500 15px var(--body);padding:8px 10px;border-radius:10px;border:1px 
   20%,24%,55%{opacity:.55;text-shadow:none}}
 @media (prefers-reduced-motion:reduce){.shine{animation:none}}
 .shine-wrap{position:relative;display:inline-block;vertical-align:middle}
+.mvpw{margin-right:6px}.mvpw .shine{margin-left:0;font-size:11px;padding:1px 6px;letter-spacing:.04em}
 .fw{position:absolute;width:0;height:0;pointer-events:none}
 .fw i{position:absolute;left:-2px;top:-2px;width:4px;height:4px;border-radius:50%;background:var(--c);
   box-shadow:0 0 6px var(--c),0 0 2px #fff;opacity:0;transform:rotate(var(--r)) translateY(0);animation:burst 1.6s ease-out infinite;animation-delay:var(--d)}
@@ -196,7 +197,7 @@ select{font:500 15px var(--body);padding:8px 10px;border-radius:10px;border:1px 
     <div class="card tbl"><table id="ties"></table></div>
     <h2>개인 성적</h2>
     <div class="card tbl"><table id="players"></table></div>
-    <p class="note">팀별 순위순 정렬(승 → 게임 득실 → 득, 동률은 같은 순위). MVP: 팀별 1위(승 → 게임 득실 → 득). 득·실은 본인이 뛴 경기의 게임 수 합계</p>
+    <p class="note">팀별 순위순 정렬(승 → 게임 득실 → 득, 동률은 같은 순위). MVP: 팀별 1위(승 → 게임 득실 → 득, 끝까지 동률이면 연장자 우선). 득·실은 본인이 뛴 경기의 게임 수 합계</p>
   </section>
 
   <section id="p-games" hidden>
@@ -410,16 +411,17 @@ function render(){
     `<tr><th>팀</th><th>진행</th><th>승점</th><th>게임 합계</th></tr>`+
     tieRows().map(r=>`<tr><td>${chip(r.a)} vs ${chip(r.b)}</td><td>${r.done}/${r.tot}</td><td><b>${r.pa} : ${r.pb}</b></td><td>${r.ga} : ${r.gb}</td></tr>`).join("");
   const ps=playerStats().sort((a,b)=>a.p.localeCompare(b.p,"ko"));
-  const mvpSet=new Set(); Object.keys(TEAMS).forEach(t=>mvpTop(ps.filter(r=>r.t===t)).forEach(r=>mvpSet.add(r.p)));
+  const mvpSet=new Set(); Object.keys(TEAMS).forEach(t=>mvpTop(ps.filter(r=>r.t===t),t).forEach(r=>mvpSet.add(r.p)));
   // 팀별 순위: 승 → 게임 득실 → 득 (동률은 같은 순위, 표시는 이름순)
   const cmp=(a,b)=>b.w-a.w||(b.gf-b.ga)-(a.gf-a.ga)||b.gf-a.gf;
-  const row=(r,rk)=>`<tr><td class="rank">${rk}</td><td class="pname">${mvpSet.has(r.p)?'<span class="vipb">MVP</span>':''}${r.p}</td><td>${r.played}/${r.n}</td><td><b>${r.w}</b></td><td>${r.d}</td><td>${r.l}</td><td>${r.gf}</td><td>${r.ga}</td><td><b>${sign(r.gf-r.ga)}</b></td></tr>`;
+  const row=(r,rk)=>`<tr><td class="rank">${rk}</td><td class="pname">${mvpSet.has(r.p)?(MVP_NEON.includes(r.p)?`<span class="shine-wrap mvpw"><span class="shine">MVP</span>${fwHTML('a')}${fwHTML('b')}${fwHTML('c')}</span>`:'<span class="vipb">MVP</span>'):''}${r.p}</td><td>${r.played}/${r.n}</td><td><b>${r.w}</b></td><td>${r.d}</td><td>${r.l}</td><td>${r.gf}</td><td>${r.ga}</td><td><b>${sign(r.gf-r.ga)}</b></td></tr>`;
   document.getElementById("players").innerHTML =
     `<tr><th>순위</th><th>선수</th><th>경기</th><th>승</th><th>무</th><th>패</th><th>득</th><th>실</th><th>득실</th></tr>`+
     Object.keys(TEAMS).map(t=>{
-      const list=ps.filter(r=>r.t===t).sort((a,b)=>cmp(a,b)||a.p.localeCompare(b.p,"ko"));
+      const pk=MVP_TIEBREAK[t], isPk=r=>r.p===pk;
+      const list=ps.filter(r=>r.t===t).sort((a,b)=>cmp(a,b)||(isPk(b)-isPk(a))||a.p.localeCompare(b.p,"ko"));
       return `<tr class="tsep"><td colspan="9">${chip(t,true)}</td></tr>`+
-        list.map((r,i)=>{let k=i; while(k>0&&cmp(list[k-1],r)===0)k--; return row(r,k+1);}).join("");
+        list.map((r,i)=>{let k=i; while(k>0&&cmp(list[k-1],r)===0&&!isPk(list[k-1]))k--; return row(r,k+1);}).join("");
     }).join("");
   renderSponsors();
   renderPhotos();
@@ -429,12 +431,19 @@ function render(){
       ps.map(p=>{const n=GAMES.filter(g=>g[5].includes(p)||g[7].includes(p)).length;return `<li>${p}<span>${n}경기</span></li>`}).join("")+`</ul></div>`;
   }).join("");
 }
-// MVP: 팀별 1위 (승 → 게임 득실 → 득)
-function mvpTop(list){
+// MVP: 팀별 1위 (승 → 게임 득실 → 득). 끝까지 동률이면 아래 지정 선수(연장자 우선, 운영진 결정)
+const MVP_TIEBREAK = { T1: "홍상현" };
+// 네온 강조 + 축포를 붙일 MVP
+const MVP_NEON = ["홍상현"];
+const fwHTML=k=>`<span class="fw fw-${k}" aria-hidden="true">${Array.from({length:10},(_,i)=>`<i style="--r:${i*36}deg"></i>`).join("")}</span>`;
+function mvpTop(list,t){
   const st=list.filter(r=>r.played>0).sort((a,b)=>b.w-a.w||(b.gf-b.ga)-(a.gf-a.ga)||b.gf-a.gf);
   if(!st.length) return [];
   const k=r=>[r.w,r.gf-r.ga,r.gf].join();
-  return st.filter(r=>k(r)===k(st[0]));
+  const top=st.filter(r=>k(r)===k(st[0]));
+  const pick=t&&MVP_TIEBREAK[t];
+  if(top.length>1&&pick&&top.some(r=>r.p===pick)) return top.filter(r=>r.p===pick);
+  return top;
 }
 function renderVip(){
   const el=document.getElementById("vip");
