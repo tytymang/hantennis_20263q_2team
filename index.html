@@ -235,7 +235,7 @@ select{font:500 15px var(--body);padding:8px 10px;border-radius:10px;border:1px 
     <p class="note">팀별 순위순 정렬(승 → 게임 득실 → 득, 동률은 같은 순위). MVP: 팀별 1위(승 → 게임 득실 → 득, 끝까지 동률이면 공동 MVP). 득·실은 본인이 뛴 경기의 게임 수 합계</p>
     <h2>종합 개인 순위</h2>
     <div class="card tbl"><table id="overall"></table></div>
-    <p class="note">팀 구분 없이 승 → 게임 득실 → 득 순. 한줄평은 오늘 경기 결과 기준</p>
+    <p class="note">팀 구분 없이, 뛴 경기 수(2·3경기)가 달라도 공정하도록 승률(무승부는 0.5승) → 경기당 게임 득실 → 경기당 득점 순. 한줄평은 오늘 경기 결과 기준</p>
   </section>
 
   <section id="p-games" hidden>
@@ -516,11 +516,14 @@ const REVIEW = {
   "추미라":"3경기 모두 출전, 끝까지 분투", "오은선":"3경기 풀타임, 혼복 5:5", "황지영":"다음 대회 반등 기대"
 };
 function renderOverall(ps){
-  const cmp=(a,b)=>b.w-a.w||(b.gf-b.ga)-(a.gf-a.ga)||b.gf-a.gf;
+  // 경기 수가 달라도 공정하게: 승률(무=0.5승) → 경기당 게임 득실 → 경기당 득 (정수 계산으로 동률 판정)
+  const rate=r=>(2*r.w+r.d)/(2*r.played), diff=r=>(r.gf-r.ga)/r.played, gfp=r=>r.gf/r.played;
+  const cmp=(a,b)=>((2*b.w+b.d)*a.played-(2*a.w+a.d)*b.played)||((b.gf-b.ga)*a.played-(a.gf-a.ga)*b.played)||(b.gf*a.played-a.gf*b.played);
   const list=ps.filter(r=>r.played>0).sort((a,b)=>cmp(a,b)||a.p.localeCompare(b.p,"ko"));
-  document.getElementById("overall").innerHTML=`<tr><th>순위</th><th style="text-align:left">선수 · 한줄평</th><th>승-무-패</th><th>득실</th></tr>`+
+  const pct=r=>Math.round(rate(r)*100)+"%", per=r=>{const v=diff(r); return (v>0?"+":v<0?"−":"")+Math.abs(v).toFixed(1);};
+  document.getElementById("overall").innerHTML=`<tr><th>순위</th><th style="text-align:left">선수 · 한줄평</th><th>승-무-패</th><th>승률</th><th>경기당<br>득실</th></tr>`+
     list.map((r,i)=>{let k=i; while(k>0&&cmp(list[k-1],r)===0)k--;
-      return `<tr><td class="rank">${k+1}</td><td class="pname ov">${chip(r.t)}${r.p}<span class="rv">${REVIEW[r.p]||""}</span></td><td>${r.w}-${r.d}-${r.l}</td><td><b>${sign(r.gf-r.ga)}</b></td></tr>`;}).join("");
+      return `<tr><td class="rank">${k+1}</td><td class="pname ov">${chip(r.t)}${r.p}<span class="rv">${REVIEW[r.p]||""}</span></td><td>${r.w}-${r.d}-${r.l}</td><td><b>${pct(r)}</b></td><td>${per(r)}</td></tr>`;}).join("");
 }
 function renderVip(){
   const el=document.getElementById("vip");
