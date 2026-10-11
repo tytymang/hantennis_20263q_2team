@@ -89,6 +89,18 @@ select{font:500 15px var(--body);padding:8px 10px;border-radius:10px;border:1px 
 .photos figure.wide{grid-column:1/-1}
 .photos figure video{display:block;width:100%;background:#000;aspect-ratio:16/9}
 .photos figure.wide img{aspect-ratio:auto}
+.selbar{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:0 0 8px}
+.selbar .sb-on,.sb-tip{display:none}
+.selmode .selbar .sb-on{display:contents}.selmode .sb-tip{display:block;margin:-2px 0 8px}
+.selmode #sb-toggle{display:none}
+.sb-btn{min-height:38px;padding:0 14px;border-radius:19px;border:1px solid var(--line);background:var(--surface);color:inherit;font:inherit;font-size:14px;font-weight:700;cursor:pointer}
+.sb-go{background:#1f6feb;border-color:#1f6feb;color:#fff}.sb-go:disabled{opacity:.45;cursor:default}
+.photos figure{position:relative}
+.selmode .photos button{cursor:pointer}
+.photos .ck{display:none;z-index:2;position:absolute;top:8px;right:8px;width:28px;height:28px;border-radius:50%;border:2px solid #fff;background:rgba(0,0,0,.35);color:#fff;font-size:17px;line-height:24px;text-align:center;font-weight:900;pointer-events:none;box-shadow:0 1px 4px rgba(0,0,0,.4)}
+.selmode .photos .ck{display:block}
+.photos figure.sel .ck{background:#1f6feb}
+.photos figure.sel img{outline:4px solid #1f6feb;outline-offset:-4px;filter:brightness(.85)}
 .photos figcaption{padding:6px 10px;font-size:13px;color:var(--muted)}
 .empty{padding:28px 16px;text-align:center;color:var(--muted);font-size:14.5px;line-height:1.7}
 .lb{position:fixed;inset:0;background:rgba(0,0,0,.97);display:flex;align-items:center;justify-content:center;z-index:10;padding:16px;cursor:zoom-out}
@@ -199,6 +211,13 @@ select{font:500 15px var(--body);padding:8px 10px;border-radius:10px;border:1px 
     <div class="card tbl"><table id="sponsors"></table></div>
     <p class="note" id="nospon" hidden>아직 등록된 찬조 내역이 없습니다.</p>
     <h2>추억</h2>
+    <div class="selbar" id="selbar">
+      <button type="button" class="sb-btn" id="sb-toggle">☑ 사진 선택해서 받기</button>
+      <span class="sb-on"><button type="button" class="sb-btn" id="sb-all">전체 선택</button>
+      <button type="button" class="sb-btn sb-go" id="sb-dl" disabled>⬇ 받기 (0)</button>
+      <button type="button" class="sb-btn" id="sb-cancel">취소</button></span>
+    </div>
+    <p class="note sb-tip">사진을 눌러 고른 뒤 [받기]를 누르세요. 휴대폰은 공유창에서 '이미지 저장'을, PC는 ZIP 파일로 받습니다.</p>
     <div class="photos" id="photos"></div>
     <div class="card empty" id="nophoto" hidden>대회 중간중간 이곳에 추억 사진이 올라옵니다.<br>찍은 사진은 운영진에게 보내주세요.</div>
   </section>
@@ -271,9 +290,9 @@ const SPONSORS = [
   // { name: "홍길동", amount: 100000, note: "현금" },
 ];
 const PHOTOS = [
-  { src: "photos/g01.jpg?v=2", cap: "단체 사진 · 18명 전원" },
-  { src: "photos/g02.jpg?v=2", cap: "단체 사진 · 파이팅!" },
   { video: "photos/v01.mp4", poster: "photos/v01.jpg", cap: "2026 3Q 한테니스 분기대회 예고 영상" },
+  { src: "photos/g01.jpg?v=2", wide: true, cap: "단체 사진 · 18명 전원" },
+  { src: "photos/g02.jpg?v=2", wide: true, cap: "단체 사진 · 파이팅!" },
   { src: "photos/09.jpg", cap: "찬조 간식 · 맥머핀 (한규용)" },
   { src: "photos/10.jpg", cap: "커피 · 음료 · 귤" },
   { src: "photos/11.jpg", cap: "바나나 · 샤인머스캣" },
@@ -537,9 +556,42 @@ function renderSponsors(){
 function renderPhotos(){
   const box=document.getElementById("photos");
   document.getElementById("nophoto").hidden=PHOTOS.length>0;
-  box.innerHTML=PHOTOS.map((ph,i)=>ph.video?`<figure class="${i===0?"wide":""}"><video src="${ph.video}" ${ph.poster?`poster="${ph.poster}"`:""} controls playsinline preload="metadata"></video>${ph.cap?`<figcaption>${ph.cap}</figcaption>`:""}</figure>`:`<figure class="${i===0?"wide":""}"><button type="button" data-src="${ph.src}" aria-label="사진 크게 보기"><img src="${ph.src}" alt="${ph.cap||"기념사진"}" loading="${i<2?"eager":"lazy"}"></button>${ph.cap?`<figcaption>${ph.cap}</figcaption>`:""}</figure>`).join("");
-  box.querySelectorAll("button[data-src]").forEach(b=>b.addEventListener("click",()=>openLB(b.dataset.src)));
+  box.innerHTML=PHOTOS.map((ph,i)=>ph.video?`<figure class="${i===0||ph.wide?"wide":""}"><video src="${ph.video}" ${ph.poster?`poster="${ph.poster}"`:""} controls playsinline preload="metadata"></video>${ph.cap?`<figcaption>${ph.cap}</figcaption>`:""}</figure>`:`<figure class="${i===0||ph.wide?"wide":""}"><button type="button" data-src="${ph.src}" aria-label="사진 크게 보기"><span class="ck" aria-hidden="true">✓</span><img src="${ph.src}" alt="${ph.cap||"기념사진"}" loading="${i<2?"eager":"lazy"}"></button>${ph.cap?`<figcaption>${ph.cap}</figcaption>`:""}</figure>`).join("");
+  box.querySelectorAll("button[data-src]").forEach(b=>b.addEventListener("click",()=>{
+    if(document.body.classList.contains("selmode")){b.parentElement.classList.toggle("sel"); updSel();}
+    else openLB(b.dataset.src);
+  }));
+  initSel();
 }
+// 여러 장 선택해서 받기
+function selected(){return [...document.querySelectorAll("#photos figure.sel button[data-src]")].map(b=>b.dataset.src);}
+function updSel(){const n=selected().length, d=document.getElementById("sb-dl"); d.textContent="⬇ 받기 ("+n+")"; d.disabled=!n;}
+function fname(src){const all=PHOTOS.filter(p=>p.src); return "한테니스_2026_3분기_"+String(all.findIndex(p=>p.src===src)+1).padStart(2,"0")+".jpg";}
+let selInit=false;
+function initSel(){ if(selInit)return; selInit=true;
+  const B=document.body, $=id=>document.getElementById(id);
+  const clear=()=>document.querySelectorAll("#photos figure.sel").forEach(f=>f.classList.remove("sel"));
+  $("sb-toggle").onclick=()=>{B.classList.add("selmode"); updSel();};
+  $("sb-cancel").onclick=()=>{B.classList.remove("selmode"); clear(); updSel();};
+  $("sb-all").onclick=()=>{const figs=[...document.querySelectorAll("#photos figure")].filter(f=>f.querySelector("button[data-src]"));
+    const all=figs.every(f=>f.classList.contains("sel")); figs.forEach(f=>f.classList.toggle("sel",!all)); $("sb-all").textContent=all?"전체 선택":"전체 해제"; updSel();};
+  $("sb-dl").onclick=async()=>{
+    const list=selected(); if(!list.length)return; const btn=$("sb-dl"); btn.disabled=true; btn.textContent="준비 중…";
+    try{
+      const blobs=await Promise.all(list.map(u=>fetch(u).then(r=>r.blob())));
+      const files=blobs.map((b,i)=>new File([b],fname(list[i]),{type:"image/jpeg"}));
+      const mobile=/Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+      if(mobile&&navigator.canShare&&navigator.canShare({files})){ await navigator.share({files}); }
+      else if(files.length===1){ saveBlob(files[0],files[0].name); }
+      else { await loadZip(); const z=new JSZip(); files.forEach(f=>z.file(f.name,f));
+        saveBlob(await z.generateAsync({type:"blob"}),"한테니스_2026_3분기_사진_"+files.length+"장.zip"); }
+    }catch(e){ if(e&&e.name!=="AbortError") alert("받기에 실패했습니다. 카카오톡 안에서는 오른쪽 위 메뉴 → '다른 브라우저로 열기' 후 다시 시도해 주세요."); }
+    updSel();
+  };
+}
+function saveBlob(b,name){const a=document.createElement("a"); a.href=URL.createObjectURL(b); a.download=name; document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href); a.remove();},4000);}
+function loadZip(){ if(window.JSZip) return Promise.resolve(); return new Promise((ok,no)=>{const s=document.createElement("script");
+  s.src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"; s.onload=ok; s.onerror=no; document.head.appendChild(s);});}
 // 사진 크게 보기: 이전/다음, 다운로드, 스와이프, 키보드
 function openLB(src){
   const list=PHOTOS.filter(p=>p.src);
