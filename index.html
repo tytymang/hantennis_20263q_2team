@@ -91,8 +91,16 @@ select{font:500 15px var(--body);padding:8px 10px;border-radius:10px;border:1px 
 .photos figure.wide img{aspect-ratio:auto}
 .photos figcaption{padding:6px 10px;font-size:13px;color:var(--muted)}
 .empty{padding:28px 16px;text-align:center;color:var(--muted);font-size:14.5px;line-height:1.7}
-.lb{position:fixed;inset:0;background:rgba(0,0,0,.92);display:flex;align-items:center;justify-content:center;z-index:10;padding:16px;cursor:zoom-out}
-.lb img{max-width:100%;max-height:100%;object-fit:contain}
+.lb{position:fixed;inset:0;background:rgba(0,0,0,.97);display:flex;align-items:center;justify-content:center;z-index:10;padding:16px;cursor:zoom-out}
+.lb img{max-width:100%;max-height:calc(100% - 96px);object-fit:contain;cursor:default}
+.lb-top{position:absolute;top:0;left:0;right:0;display:flex;align-items:center;gap:8px;padding:10px 12px;color:#fff;font-size:14px}
+.lb-cnt{flex:1;font-weight:700;opacity:.9}
+.lb-btn{display:inline-flex;align-items:center;justify-content:center;min-height:40px;padding:0 14px;border-radius:20px;border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.12);color:#fff;font-size:14px;font-weight:700;text-decoration:none;cursor:pointer}
+.lb-x{width:40px;padding:0;font-size:18px}
+.lb-nav{position:absolute;top:50%;transform:translateY(-50%);width:48px;height:64px;border:0;border-radius:12px;background:rgba(0,0,0,.35);color:#fff;font-size:40px;line-height:1;cursor:pointer}
+.lb-prev{left:6px}.lb-next{right:6px}
+.lb-nav:hover,.lb-btn:hover{background:rgba(255,255,255,.25)}
+.lb-cap{position:absolute;bottom:0;left:0;right:0;padding:12px 16px calc(14px + env(safe-area-inset-bottom));text-align:center;color:#fff;font-size:14px;opacity:.9}
 .mysum{padding:12px 14px;margin-bottom:12px;font-size:14.5px;display:flex;gap:6px 14px;flex-wrap:wrap;align-items:center}
 .mysum b{font-size:16px}
 .pname{text-align:left;font-weight:700}
@@ -503,11 +511,33 @@ function renderPhotos(){
   const box=document.getElementById("photos");
   document.getElementById("nophoto").hidden=PHOTOS.length>0;
   box.innerHTML=PHOTOS.map((ph,i)=>ph.video?`<figure class="${i===0?"wide":""}"><video src="${ph.video}" ${ph.poster?`poster="${ph.poster}"`:""} controls playsinline preload="metadata"></video>${ph.cap?`<figcaption>${ph.cap}</figcaption>`:""}</figure>`:`<figure class="${i===0?"wide":""}"><button type="button" data-src="${ph.src}" aria-label="사진 크게 보기"><img src="${ph.src}" alt="${ph.cap||"기념사진"}" loading="${i<2?"eager":"lazy"}"></button>${ph.cap?`<figcaption>${ph.cap}</figcaption>`:""}</figure>`).join("");
-  box.querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>{
-    const lb=document.createElement("div"); lb.className="lb"; lb.setAttribute("role","dialog");
-    const im=document.createElement("img"); im.src=b.dataset.src; im.alt="기념사진 크게 보기"; lb.appendChild(im);
-    lb.addEventListener("click",()=>lb.remove()); document.body.appendChild(lb);
-  }));
+  box.querySelectorAll("button[data-src]").forEach(b=>b.addEventListener("click",()=>openLB(b.dataset.src)));
+}
+// 사진 크게 보기: 이전/다음, 다운로드, 스와이프, 키보드
+function openLB(src){
+  const list=PHOTOS.filter(p=>p.src);
+  let i=Math.max(0,list.findIndex(p=>p.src===src));
+  const lb=document.createElement("div"); lb.className="lb"; lb.setAttribute("role","dialog"); lb.setAttribute("aria-label","사진 크게 보기");
+  lb.innerHTML=`<img alt=""><div class="lb-top"><span class="lb-cnt"></span><a class="lb-btn lb-dl" download>⬇ 다운로드</a><button type="button" class="lb-btn lb-x" aria-label="닫기">✕</button></div>
+    <button type="button" class="lb-nav lb-prev" aria-label="이전 사진">‹</button><button type="button" class="lb-nav lb-next" aria-label="다음 사진">›</button><div class="lb-cap"></div>`;
+  const im=lb.querySelector("img"), cnt=lb.querySelector(".lb-cnt"), dl=lb.querySelector(".lb-dl"), cap=lb.querySelector(".lb-cap");
+  const show=k=>{i=(k+list.length)%list.length; const p=list[i];
+    im.src=p.src; im.alt=p.cap||"기념사진"; cnt.textContent=(i+1)+" / "+list.length; cap.textContent=p.cap||"";
+    dl.href=p.src; dl.setAttribute("download","한테니스_2026_3분기_"+String(i+1).padStart(2,"0")+".jpg");
+    [list[(i+1)%list.length],list[(i-1+list.length)%list.length]].forEach(q=>{const x=new Image(); x.src=q.src;});};
+  const close=()=>{lb.remove(); document.removeEventListener("keydown",key); document.body.style.overflow="";};
+  const key=e=>{if(e.key==="ArrowRight")show(i+1); else if(e.key==="ArrowLeft")show(i-1); else if(e.key==="Escape")close();};
+  lb.querySelector(".lb-prev").addEventListener("click",e=>{e.stopPropagation();show(i-1);});
+  lb.querySelector(".lb-next").addEventListener("click",e=>{e.stopPropagation();show(i+1);});
+  lb.querySelector(".lb-x").addEventListener("click",e=>{e.stopPropagation();close();});
+  dl.addEventListener("click",e=>e.stopPropagation());
+  lb.addEventListener("click",e=>{if(e.target===lb)close();});
+  let sx=null,sy=0;
+  lb.addEventListener("touchstart",e=>{sx=e.touches[0].clientX; sy=e.touches[0].clientY;},{passive:true});
+  lb.addEventListener("touchend",e=>{if(sx===null)return; const dx=e.changedTouches[0].clientX-sx, dy=e.changedTouches[0].clientY-sy; sx=null;
+    if(Math.abs(dx)>40&&Math.abs(dx)>Math.abs(dy)) show(dx<0?i+1:i-1);},{passive:true});
+  document.addEventListener("keydown",key); document.body.style.overflow="hidden";
+  document.body.appendChild(lb); show(i);
 }
 function renderGames(){
   const who=document.getElementById("who").value;
