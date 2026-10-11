@@ -153,7 +153,8 @@ select{font:500 15px var(--body);padding:8px 10px;border-radius:10px;border:1px 
 .mvpw{margin-right:6px}
 .shine.nn{margin-left:5px;font-size:11px;padding:1px 5px;border-color:#4fe3ff;color:#effcff;text-shadow:0 0 2px #fff,0 0 6px #4fe3ff,0 0 12px #4fe3ff;box-shadow:0 0 6px #4fe3ff,0 0 14px rgba(79,227,255,.5),inset 0 0 8px rgba(79,227,255,.4);animation:neonb 3.4s infinite}
 @keyframes neonb{0%,30%,34%,70%,100%{opacity:1}32%,72%{opacity:.5}}
-@media (prefers-reduced-motion:reduce){.shine.nn{animation:none}}.mvpw .shine{margin-left:0;font-size:11px;padding:1px 6px;letter-spacing:.04em}
+@media (prefers-reduced-motion:reduce){.shine.nn{animation:none}}
+@media (max-width:400px){.shine.nn{display:block;width:max-content;margin:4px 0 0;font-size:10.5px}}.mvpw .shine{margin-left:0;font-size:11px;padding:1px 6px;letter-spacing:.04em}
 .fw{position:absolute;width:0;height:0;pointer-events:none}
 .fw i{position:absolute;left:-2px;top:-2px;width:4px;height:4px;border-radius:50%;background:var(--c);
   box-shadow:0 0 6px var(--c),0 0 2px #fff;opacity:0;transform:rotate(var(--r)) translateY(0);animation:burst 1.6s ease-out infinite;animation-delay:var(--d)}
@@ -439,7 +440,7 @@ const MVP_TIEBREAK = { T1: "홍상현" };
 // 네온 강조 + 축포를 붙일 MVP
 const MVP_NEON = ["홍상현"];
 // 이름 옆 네온 문구
-const NAME_NEON = { "정은혜": "아쉬비" };
+const NAME_NEON = { "정은혜": "아까비 나이" };
 const fwHTML=k=>`<span class="fw fw-${k}" aria-hidden="true">${Array.from({length:10},(_,i)=>`<i style="--r:${i*36}deg"></i>`).join("")}</span>`;
 function mvpTop(list,t){
   const st=list.filter(r=>r.played>0).sort((a,b)=>b.w-a.w||(b.gf-b.ga)-(a.gf-a.ga)||b.gf-a.gf);
